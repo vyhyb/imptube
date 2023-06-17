@@ -9,7 +9,7 @@ It uses several python packages:
 - pandas
 
 ## Installation
-The library is currently not part of pip nor conda.
+It is currently not possible to install this library using pip or conda.
 
 ## Usage
 The library currently provides two way to perform a measurement.
