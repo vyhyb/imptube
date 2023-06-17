@@ -232,6 +232,19 @@ class Sample:
             self.folder, 
             self.timestamp
             )
+        bound_dict = {
+            'temp': [self.temperature],
+            'RH': [self.rel_humidity],
+            'x1': [self.tube.further_mic_dist],
+            'x2': [self.tube.closer_mic_dist],
+            'lim': [self.tube.freq_limit],
+            }
+        self.boundary_df = pd.DataFrame(bound_dict)
+        self.boundary_df.to_csv(
+            os.path.join(
+                self.trees[2],self.trees[1]+"_bound_cond.csv"
+            )
+        )
             
     def migrate_cal(self, cal_name, cal_stamp, cal_parent="data"):
         """Migrates calibration files from different measurement.
