@@ -1,4 +1,11 @@
-from .tube import Tube, Measurement, Sample, single_measurement, calculate_alpha
+from .tube import (
+    Tube, 
+    Measurement, 
+    Sample, 
+    single_measurement, 
+    calculate_alpha, 
+    calibration
+)
 
 from .processing.signal_proc import (
     read_audio, 
