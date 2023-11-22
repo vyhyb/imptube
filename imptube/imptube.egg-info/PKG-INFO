@@ -1,3 +1,19 @@
+Metadata-Version: 2.1
+Name: imptube
+Version: 0.0.1
+Summary: A package for impedance tube measurements.
+Home-page: https://github.com/vyhyb/imptube/tree/main
+Author: David Jun
+Author-email: David.Jun@vut.cz
+License: MIT
+Classifier: Licence :: OSI Approved :: MIT Licence
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Provides-Extra: dev
+License-File: LICENSE
+
 # imptube
 
 This library provides an implementation of transfer function impedance tube measurements according to [ISO 10534-2:1998](https://www.iso.org/standard/22851.html).

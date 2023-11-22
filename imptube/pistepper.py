@@ -1,3 +1,8 @@
+""" An example implementation of the Stepper class for movabletermination.
+In this case, implemented for the original impedance tube operated solely
+by Raspberry Pi 4 Model B. Because of some sound stability issues,
+newer implementation relies on FT232H breakout board from Adafruit.
+"""
 from time import sleep
 import RPi.GPIO as GPIO
 import numpy as np

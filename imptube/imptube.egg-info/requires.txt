@@ -1,0 +1,9 @@
+sounddevice
+soundfile
+scipy
+numpy
+pandas
+
+[dev]
+pytest
+twine
