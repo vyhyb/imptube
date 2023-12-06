@@ -1,3 +1,6 @@
+"""
+This module contains functions for filtering signals obtained from the impedance tube measurements.
+"""
 from scipy.signal import stft, istft, windows
 import numpy as np
 from typing import Tuple

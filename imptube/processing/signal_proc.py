@@ -1,3 +1,6 @@
+"""
+This module contains functions for processing audio signals from the impedance tube measurements.
+"""
 import numpy as np
 from scipy.fft import fft, fftfreq
 

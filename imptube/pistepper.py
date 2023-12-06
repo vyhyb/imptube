@@ -9,18 +9,6 @@ for setting the microstepping resolution, defining the ramping of the motor
 speed, initiating GPIO settings, enabling/disabling the motor, and performing
 the actual spinning of the motor.
 
-Classes:
-- PiStepper: Contains methods for stepper motor operation using Pi and DRV8825 driver
-
-Methods:
-- __init__(self, res="Half"): Initializes a PiStepper object with the specified microstepping resolution.
-- set_delay(self, step_count, fade=1, sin_begin=4): Defines the ramping of the stepper motor speed.
-- on(self): Initiates GPIO settings for the stepper motor.
-- off(self): Cleans up the GPIO settings.
-- enable(self): Operates the ENABLE pin on the driver to avoid noise induced by holding the motor in a position.
-- disable(self): Disables the motor by setting the ENABLE pin to high.
-- turn(self, revolutions=1, clockwise=True): Performs the actual spinning of the motor.
-
 Constants:
 - DIR: Direction GPIO Pin
 - STEP: Step GPIO Pin
@@ -32,9 +20,10 @@ Constants:
 - FREQ: Frequency
 - RESOLUTION: Dictionary mapping microstepping resolution names to GPIO pin values
 - RESOLUTION_M: Dictionary mapping microstepping resolution names to step multipliers
+
 """
 from time import sleep
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 import numpy as np
 
 DIR = 20   # Direction GPIO Pin

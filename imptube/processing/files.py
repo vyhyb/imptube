@@ -1,3 +1,6 @@
+"""
+This module contains functions for reading and processing audio files.
+"""
 import scipy.io.wavfile as wav
 import pandas as pd
 import numpy as np

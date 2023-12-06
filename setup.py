@@ -5,7 +5,7 @@ with open("./README.md", "r") as f:
 
 setup(
     name= "imptube",
-    version= "0.0.1",
+    version= "0.0.2",
     description = "A package for impedance tube measurements.",
     package_dir={"": "imptube"},
     packages=find_packages(where="imptube"),
