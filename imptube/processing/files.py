@@ -16,10 +16,42 @@ from .signal_proc import (
 from ..utils import filter, read_folder
 
 
-def read_file(path):
+def read_file(path : str) -> tuple[int, np.ndarray]:
+    """
+    Read a WAV file from the given path.
+
+    Parameters
+    ----------
+    path : str
+        The path to the WAV file.
+
+    Returns
+    -------
+    tuple
+        A tuple containing two elements:
+        - The audio data as a 1-D numpy array.
+        - The sample rate of the audio.
+
+    """
     return wav.read(path)
 
-def load_bc(parent_folder):
+import numpy as np
+import pandas as pd
+
+def load_bc(parent_folder : str) -> pd.DataFrame:
+    """
+    Load the bound condition data from a given parent folder.
+
+    Parameters:
+    -----------
+    parent_folder : str
+        The path to the parent folder containing the bound condition file.
+
+    Returns:
+    --------
+    pd.DataFrame
+        The loaded bound condition data as a pandas DataFrame.
+    """
     file_paths = read_folder(parent_folder)
     bc_path = filter(
             file_paths,
@@ -28,7 +60,20 @@ def load_bc(parent_folder):
     bc_df = pd.read_csv(bc_path[0])
     return bc_df
 
-def load_freqs(parent_folder):
+def load_freqs(parent_folder : str) -> np.ndarray:
+    """
+    Load frequency data from the specified parent folder.
+
+    Parameters
+    ----------
+    parent_folder : str
+        The path to the parent folder containing the frequency data.
+
+    Returns
+    -------
+    numpy.ndarray
+        The loaded frequency data as a NumPy array.
+    """
     file_paths = read_folder(parent_folder)
     freqs_path = filter(
             file_paths,
@@ -37,7 +82,23 @@ def load_freqs(parent_folder):
     freqs = np.load(freqs_path[0])
     return freqs
 
-def load_alpha(parent_folder):
+import numpy as np
+
+def load_alpha(parent_folder : str) -> tuple[list[np.ndarray], list[str]]:
+    """Load sound absorption coefficient data from the specified parent folder.
+
+    Parameters
+    ----------
+    parent_folder : str
+        The path to the parent folder containing the sound absorption coefficient data files.
+
+    Returns
+    -------
+    tuple
+        A tuple containing two lists:
+        - alpha: A list of numpy arrays, each representing an sound absorption coefficient data file.
+        - unique_d: A list of unique 'd' values extracted from the file paths.
+    """
     file_paths = read_folder(parent_folder)
     alpha_path = filter(
             file_paths,
@@ -52,10 +113,41 @@ def load_alpha(parent_folder):
         unique_d.append(p[idx1:idx2])
     return alpha, unique_d
 
-def transfer_function_from_file(path=None, folder=None, filter_str="_"):
+def transfer_function_from_file(
+        path : str=None, 
+        folder : str=None, 
+        filter_str : str="_"
+        ) -> np.ndarray:
+    """Calculate the transfer function from a file or a folder of files.
+
+    Parameters
+    ----------
+    path : str, optional
+        Path to the file, by default None.
+    folder : str, optional
+        Path to the folder containing files, by default None.
+    filter_str : str, optional
+        Filter string to select specific files in the folder, by default "_".
+
+    Returns
+    -------
+    ndarray
+        The transfer function calculated from the input file(s).
+
+    Raises
+    ------
+    ValueError
+        If both `path` and `folder` are None.
+
+    Notes
+    -----
+    - If `folder` is None, the function will calculate the transfer function from a single file specified by `path`.
+    - If `folder` is provided, the function will calculate the average transfer function from all files in the folder that match the `filter_str`.
+
+    """
     if folder is None:
         if path is None:
-            print("You need to define path to file (path), or to folder (folder)")
+            raise ValueError("You need to define path to file (path), or to folder (folder)")
         else:
             f = read_file(path)
             a = read_audio(f)
@@ -81,7 +173,31 @@ def transfer_function_from_file(path=None, folder=None, filter_str="_"):
         tf = transfer_function(p1_np, p2_np)
     return tf
 
-def calibration_from_files(path1=None, path2=None, parent_folder=None, export=True):
+def calibration_from_files(
+        path1: str = None,
+        path2: str = None, 
+        parent_folder: str = None, 
+        export: bool = True
+        ) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Perform calibration from audio files.
+
+    Parameters
+    ----------
+    path1 : str, optional
+        Path to the first audio file, by default None.
+    path2 : str, optional
+        Path to the second audio file, by default None.
+    parent_folder : str, optional
+        Path to the parent folder containing calibration and audio folders, by default None.
+    export : bool, optional
+        Whether to export calibration data, by default True.
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray]
+        Tuple containing the calibration factor and frequency data.
+    """
     if parent_folder is None:
         f1 = read_file(path1)
         f2 = read_file(path2)
@@ -133,7 +249,22 @@ def calibration_from_files(path1=None, path2=None, parent_folder=None, export=Tr
             np.save(os.path.join(export_folder, base_name+"_cal_f_12.npy"), cf) #cf export
     return cf, freqs
 
-def transfer_function_from_path(parent_folder):
+def transfer_function_from_path(
+        parent_folder: str
+        ) -> tuple[np.ndarray, np.ndarray]:
+    """Calculate transfer functions from audio files in the given parent folder.
+
+    Parameters
+    ----------
+    parent_folder : str
+        The path to the parent folder containing the audio files.
+
+    Returns
+    -------
+    tuple
+        A tuple containing the unique values of 'd' extracted from the audio file names,
+        and a list of transfer functions corresponding to each unique 'd' value.
+    """
     bc_df = load_bc(parent_folder)
     limit = int(bc_df["lim"].iloc[0])
     audio_folder = os.path.join(parent_folder, "measurement", "audio")
@@ -156,7 +287,37 @@ def transfer_function_from_path(parent_folder):
 
     return unique_d, tfs
 
-def alpha_from_path(parent_folder, fs=48000, cal=None, tfs=None, bc=None, return_f=False):
+def alpha_from_path(
+        parent_folder : str, 
+        fs : int=48000, 
+        cal : np.ndarray=None, 
+        tfs : np.ndarray=None, 
+        bc : pd.DataFrame=None, 
+        return_f : bool=False
+        ) -> tuple[np.ndarray, np.ndarray]:
+    """Calculate the absorption coefficient from the given parent folder path.
+
+    Parameters
+    ----------
+    parent_folder : str
+        The path of the parent folder.
+    fs : int, optional
+        The sampling frequency, by default 48000.
+    cal : np.ndarray, optional
+        The calibration transfer function, by default None.
+    tfs : np.ndarray, optional
+        The transfer functions, by default None.
+    bc : pd.DataFrame, optional
+        The boundary conditions, by default None.
+    return_f : bool, optional
+        Whether to return the absorption coefficient and frequencies, by default False.
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray] or np.ndarray
+        If return_f is True, returns a tuple containing the absorption coefficient and frequencies.
+        Otherwise, returns only the absorption coefficient.
+    """
     # boundary conditions
     if bc is None:
         bc_df = load_bc(parent_folder)

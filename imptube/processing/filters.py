@@ -1,27 +1,80 @@
 from scipy.signal import stft, istft, windows
 import numpy as np
+from typing import Tuple
 
 from .signal_proc import stereo_to_spectra, transfer_function
 
-def spectral_filtering(arr, low_pass):
+def spectral_filtering(arr: np.ndarray, low_pass: int) -> np.ndarray:
+    """
+    Apply spectral filtering to an array.
+
+    Parameters
+    ----------
+    arr : np.ndarray
+        The input array.
+    low_pass : int
+        The cutoff frequency for the low-pass filter.
+
+    Returns
+    -------
+    np.ndarray
+        The filtered array.
+    """
     spectrum = stft(arr, nperseg=64)
     for s in spectrum[2].T:
         s[low_pass:] = 0
     return istft(spectrum[2])[1][:len(arr)]
 
-def extend_with_zeros(p_time):
+def extend_with_zeros(p_time : np.ndarray) -> np.ndarray:
+    """
+    Extend the input array with zeros.
+
+    Parameters
+    ----------
+    p_time : np.ndarray
+        The input array.
+
+    Returns
+    -------
+    np.ndarray
+        The extended array with zeros.
+    """
     if len(p_time.shape) == 2:
         extended = np.concatenate((p_time, np.zeros_like(p_time)), axis=1)
     elif len(p_time.shape) == 1:
         extended = np.concatenate((p_time, np.zeros_like(p_time)))
     return extended
 
-def tf_filtering(tf, lowcut=10, highcut=1000, fs=48000):
-    '''
-    This function windows a transfer function to a limited bandwidth.
+def tf_filtering(
+        tf : np.ndarray, 
+        lowcut : int=10, 
+        highcut : int=1000, 
+        fs : int=48000
+        ) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Window a transfer function to a limited bandwidth.
+
+    Parameters
+    ----------
+    tf : np.ndarray
+        The transfer function to be filtered.
+    lowcut : int, optional
+        The lower cutoff frequency in Hz. Default is 10.
+    highcut : int, optional
+        The upper cutoff frequency in Hz. Default is 1000.
+    fs : int, optional
+        The sampling frequency in Hz. Default is 48000.
+
+    Returns
+    -------
+    Tuple[np.ndarray, np.ndarray]
+        A tuple containing the filtered transfer function and the filter window.
+
+    Notes
+    -----
     For some reason, when used for calibration TF filtering, 
     lowcut should be put high enough to prevent problems with low S/N ratio.
-    '''
+    """
     freqs = np.fft.fftfreq(len(tf), 1/fs)
     window = np.zeros_like(freqs)
     f_step = freqs[1]-freqs[0]
@@ -43,31 +96,91 @@ def tf_filtering(tf, lowcut=10, highcut=1000, fs=48000):
     window[-idx_high:-(idx_high-len(r_win))] = r_win[::-1]
     return tf*window, window
 
-def ir_filtering(impulse_response):
-    '''
-    This function cuts out second half of the IR, which contains harmonic distortion products.
-    '''    
-    cut = int(len(impulse_response)/2)
+def ir_filtering(impulse_response: np.ndarray) -> np.ndarray:
+    """
+    This function cuts out the second half of the impulse response, which contains harmonic distortion products.
+
+    Parameters
+    ----------
+    impulse_response : np.ndarray
+        The input impulse response.
+
+    Returns
+    -------
+    np.ndarray
+        The filtered impulse response with the second half cut out.
+    """
+    cut = int(len(impulse_response) / 2)
     impulse_response[cut:] = 0 
     return impulse_response
 
-def count_octaves(f0, f1):
-    '''
-    This function counts octaves between two provided frequencies.
-    '''
-    return np.log(f1/f0)/np.log(2)
+def ir_filtering(impulse_response: np.ndarray) -> np.ndarray:
+    """
+    This function cuts out the second half of the impulse response, which contains harmonic distortion products.
 
-def harmonic_distortion_filter(p_time, p_ref, f_low=10, f_high=1000, fs=48000, roll_fwd=True):
+    Parameters
+    ----------
+    impulse_response : np.ndarray
+        The input impulse response array.
+
+    Returns
+    -------
+    np.ndarray
+        The filtered impulse response array.
+    """    
+    cut = int(len(impulse_response) / 2)
+    impulse_response[cut:] = 0 
+    return impulse_response
+
+def count_octaves(f0: float, f1: float) -> float:
+    """
+    This function counts octaves between two provided frequencies.
+
+    Parameters
+    ----------
+    f0 : float
+        The lower frequency.
+    f1 : float
+        The higher frequency.
+
+    Returns
+    -------
+    float
+        The number of octaves between f0 and f1.
+    """
+    return np.log(f1/f0) / np.log(2)
+
+def harmonic_distortion_filter(
+        p_time : np.ndarray, 
+        p_ref : np.ndarray, 
+        f_low : float=10, 
+        f_high : float=1000, 
+        fs : int=48000, 
+        roll_fwd : bool=True
+        ) -> np.ndarray:
     '''
     Combination of IR and TF filtering for removing harmonic distortion from measured signal.
-    p_time  - time domain recording
-    p_ref   - reference (source time sequence)
-    f_low   - lower frequency limit of the reference (used for TF filtering and rolling)
-        For some reason, to filter calibration audio, 
-        this should be higher then the original frequency limit of the sweep.
-    f_high  - higher frequency limit of the reference
-    fs      - sampling frequency
-    roll_fwd - sets the direction for reference signal rolling. This is done to keep the end of the measured sweep.
+
+    Parameters
+    ----------
+    p_time : np.ndarray
+        Time domain recording.
+    p_ref : np.ndarray
+        Reference (source time sequence).
+    f_low : float
+        Lower frequency limit of the reference (used for TF filtering and rolling).
+        For some reason, to filter calibration audio, this should be higher than the original frequency limit of the sweep.
+    f_high : float
+        Higher frequency limit of the reference.
+    fs : int
+        Sampling frequency.
+    roll_fwd : bool
+        Sets the direction for reference signal rolling. This is done to keep the end of the measured sweep.
+
+    Returns
+    -------
+    np.ndarray
+        Array containing the filtered time domain signals for both channels.
     '''
     octave_span = len(p_ref)/count_octaves(f_low, f_high)
 
@@ -98,6 +211,5 @@ def harmonic_distortion_filter(p_time, p_ref, f_low=10, f_high=1000, fs=48000, r
 
     pf_1_time = np.fft.ifft(pf_1)[:int(len(p_ref)/2)]
     pf_2_time = np.fft.ifft(pf_2)[:int(len(p_ref)/2)]
-
 
     return np.asarray([pf_1_time, pf_2_time]).astype(np.float32)
