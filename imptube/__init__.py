@@ -1,7 +1,8 @@
 """
+[GitHub repository](https://github.com/vyhyb/imptube)
+
 This library provides an implementation of transfer function impedance tube measurements according to [ISO 10534-2:1998](https://www.iso.org/standard/22851.html).
 
-[GitHub repository](https://github.com/vyhyb/imptube)
 
 It requires several Python packages to be installed:
 
