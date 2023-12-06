@@ -28,7 +28,7 @@ This method shows the inner logic of the whole measurement. In contrast to the s
 import imptube as imp
 
 temp = 29  # Temperature in degrees Celsius
-humidity = 30  # Humidity level in percentage
+humidity = 30  # Relative humidity in percent
 atm_pressure = 101300  # Atmospheric pressure in Pascal
 
 tube = imp.Tube(
