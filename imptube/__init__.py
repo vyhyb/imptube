@@ -1,6 +1,8 @@
 """
 This library provides an implementation of transfer function impedance tube measurements according to [ISO 10534-2:1998](https://www.iso.org/standard/22851.html).
 
+[GitHub repository](https://github.com/vyhyb/imptube)
+
 It requires several Python packages to be installed:
 
 - sounddevice
@@ -11,7 +13,7 @@ It requires several Python packages to be installed:
 
 ## Installation
 
-It is currently not possible to install this library using `pip` or `conda`, please use the latest released package instead and install using [`pip` locally](https://packaging.python.org/en/latest/tutorials/installing-packages/).
+It is currently not possible to install this library using `pip` or `conda`, please use the latest [released package](https://github.com/vyhyb/imptube/releases) instead and install using [`pip` locally](https://packaging.python.org/en/latest/tutorials/installing-packages/).
 
 ## Usage
 
@@ -94,6 +96,9 @@ imp.single_measurement(
     depth=160
 )
 ```
+## Acknowledgments
+
+This library was created thanks to the [FAST-J-21-7481](https://www.vut.cz/vav/projekty/detail/32738) and [FAST-J-22-7880](https://www.vut.cz/vav/projekty/detail/33840) projects.
 
 ## Contributing
 
