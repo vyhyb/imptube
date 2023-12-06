@@ -1,5 +1,62 @@
 '''In this module, two main classes are defined - Measurement, Tube
+
+Measurement:
+    Contains information about measurement from the perspective of signal and boundary conditions.
+
+    Attributes:
+        fs (int): Measurement sampling frequency.
+        channels_in (list[int]): List of input channel numbers.
+        channels_out (list[int]): List of output channel numbers (usually one member list).
+        device (str): String specifying part of sound card name. List of available devices can be obtained with 'python3 -m sounddevice' command.
+        samples (int): Number of samples in the generated log sweep, typically 2**n.
+        window_len (int): Length of the Hann half-window applied to the ends of the sweep.
+        sub_measurements (int): Number of measurements taken for each specimen. Normally, no differences between sweep measurements should occur, this attribute mainly compensates for potential playback artifacts.
+        f_low (int): Lower frequency limit for the generated sweep.
+        f_high (int): Higher frequency limit for the generated sweep.
+
+    Methods:
+        make_sweep(fs, samples, window_len, f_low, f_high) -> np.ndarray:
+            Generates numpy array with log sweep.
+
+        measure(out_path, thd_filter, export) -> tuple[np.ndarray, int]:
+            Performs measurement and saves the recording.
+
+Tube:
+    Class representing tube geometry.
+
+    Attributes:
+        further_mic_distance (float): Further microphone distance from sample.
+        closer_mic_distance (float): Closer microphone distance from sample.
+        freq_limit (int): Higher frequency limit for exports.
+
+    Methods:
+        None
+
+Sample:
+    A class representing sample and its boundary conditions.
+
+    Attributes:
+        name (str): Name of the sample.
+        temperature (float): Ambient temperature in degC.
+        rel_humidity (float): Ambient relative humidity in %.
+        tube (Tube): Impedance tube definition object.
+        timestamp (str): strftime timestamp in a format '%y-%m-%d_%H-%M'.
+        folder (str): Path to project data folder, defaults to "data".
+
+    Methods:
+        migrate_cal(cal_name, cal_stamp, cal_parent="data"):
+            Migrates calibration files from different measurement.
+
+calibration(sample, measurement, thd_filter):
+    Performs CLI calibration measurement.
+
+single_measurement(sample, measurement, depth, thd_filter=True) -> tuple[list[np.ndarray], int]:
+    Performs measurement.
+
+calculate_alpha(sample):
+    Calculates alpha coefficient for the sample.
 '''
+
 import sys
 import sounddevice as sd
 import numpy as np
@@ -48,7 +105,7 @@ class Measurement:
     f_high : int
         higher frequency limit for the generated sweep
     """
-        
+
     def __init__(
             self, 
             fs : int=48000, 

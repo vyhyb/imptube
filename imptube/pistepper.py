@@ -1,7 +1,37 @@
-""" An example implementation of the Stepper class for movabletermination.
+""" An example implementation of the Stepper class for movable termination.
 In this case, implemented for the original impedance tube operated solely
 by Raspberry Pi 4 Model B. Because of some sound stability issues,
 newer implementation relies on FT232H breakout board from Adafruit.
+
+This module provides a PiStepper class that contains methods for controlling
+a stepper motor using a Raspberry Pi and a DRV8825 driver. The class allows
+for setting the microstepping resolution, defining the ramping of the motor
+speed, initiating GPIO settings, enabling/disabling the motor, and performing
+the actual spinning of the motor.
+
+Classes:
+- PiStepper: Contains methods for stepper motor operation using Pi and DRV8825 driver
+
+Methods:
+- __init__(self, res="Half"): Initializes a PiStepper object with the specified microstepping resolution.
+- set_delay(self, step_count, fade=1, sin_begin=4): Defines the ramping of the stepper motor speed.
+- on(self): Initiates GPIO settings for the stepper motor.
+- off(self): Cleans up the GPIO settings.
+- enable(self): Operates the ENABLE pin on the driver to avoid noise induced by holding the motor in a position.
+- disable(self): Disables the motor by setting the ENABLE pin to high.
+- turn(self, revolutions=1, clockwise=True): Performs the actual spinning of the motor.
+
+Constants:
+- DIR: Direction GPIO Pin
+- STEP: Step GPIO Pin
+- MODE: Microstep Resolution GPIO Pins
+- ENABLE: Enable GPIO Pin
+- CW: Clockwise Rotation
+- CCW: Counterclockwise Rotation
+- SPR: Steps per Revolution
+- FREQ: Frequency
+- RESOLUTION: Dictionary mapping microstepping resolution names to GPIO pin values
+- RESOLUTION_M: Dictionary mapping microstepping resolution names to step multipliers
 """
 from time import sleep
 import RPi.GPIO as GPIO
@@ -33,20 +63,81 @@ class PiStepper:
     """
     Contains methods for stepper motor operation using Pi and DRV8825 driver
     
-    methods:
-    __init__(res) - makes object with the definition of microstepping
-    set_delay(step_count, fade, sin_begin) - defines ramping of the stepper motor speed
-    on() - initiates GPIO settings
-    off() - cleanes up the GPIO settings
-    enable()/disable() - operates the ENABLE pin on driver to avoid the noise induces by holding motor in a position.
-    turn(revolutions, clockwise) - performing actual spinning
+    Attributes:
+    ----------
+    res : str
+        The microstepping resolution of the stepper motor.
+    delay : numpy.ndarray
+        The delay values for each step in the stepper motor movement.
+    
+    Methods:
+    --------
+    __init__(res="Half"):
+        Initializes a PiStepper object with the specified microstepping resolution.
+        
+        Parameters:
+        ----------
+        res : str, optional
+            The microstepping resolution of the stepper motor. Default is "Half".
+    
+    set_delay(step_count, fade=1, sin_begin=4):
+        Sets the delay values for each step in the stepper motor movement.
+        
+        Parameters:
+        ----------
+        step_count : int
+            The total number of steps in the stepper motor movement.
+        fade : float, optional
+            The duration of the ramping effect at the beginning and end of the movement. Default is 1.
+        sin_begin : int, optional
+            The number of steps over which the ramping effect is applied. Default is 4.
+    
+    on():
+        Initializes the GPIO settings for the stepper motor operation.
+    
+    off():
+        Cleans up the GPIO settings after the stepper motor operation.
+    
+    enable():
+        Enables the stepper motor by operating the ENABLE pin on the driver.
+    
+    disable():
+        Disables the stepper motor by operating the ENABLE pin on the driver.
+    
+    turn(revolutions=1, clockwise=True):
+        Performs the actual spinning of the stepper motor.
+        
+        Parameters:
+        ----------
+        revolutions : float, optional
+            The number of full revolutions to be performed by the stepper motor. Default is 1.
+        clockwise : bool, optional
+            Specifies the direction of rotation. True for clockwise, False for counterclockwise. Default is True.
     """
+
     def __init__(self, res="Half"):
+        """
+        Initializes a PiStepper object with the specified microstepping resolution.
+        
+        Parameters:
+        ----------
+        res : str, optional
+            The microstepping resolution of the stepper motor. Default is "Half".
+        """
         self.res = res
 
     def set_delay(self, step_count, fade=1, sin_begin=4):
         """
-        docstring
+        Sets the delay values for each step in the stepper motor movement.
+        
+        Parameters:
+        ----------
+        step_count : int
+            The total number of steps in the stepper motor movement.
+        fade : float, optional
+            The duration of the ramping effect at the beginning and end of the movement. Default is 1.
+        sin_begin : int, optional
+            The number of steps over which the ramping effect is applied. Default is 4.
         """
         self.delay = np.full(
             step_count,
@@ -69,7 +160,7 @@ class PiStepper:
 
     def on(self):
         """
-        docstring
+        Initializes the GPIO settings for the stepper motor operation.
         """
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(DIR, GPIO.OUT)
@@ -82,20 +173,33 @@ class PiStepper:
 
     def off(self):
         """
-        docstring
+        Cleans up the GPIO settings after the stepper motor operation.
         """
         GPIO.cleanup()
 
     def enable(self):
+        """
+        Enables the stepper motor by operating the ENABLE pin on the driver.
+        """
         GPIO.output(ENABLE, 0)
 
     def disable(self):
+        """
+        Disables the stepper motor by operating the ENABLE pin on the driver.
+        """
         GPIO.output(ENABLE, 1)
 
 
     def turn(self, revolutions=1, clockwise=True):
         """
-        docstring
+        Performs the actual spinning of the stepper motor.
+        
+        Parameters:
+        ----------
+        revolutions : float, optional
+            The number of full revolutions to be performed by the stepper motor. Default is 1.
+        clockwise : bool, optional
+            Specifies the direction of rotation. True for clockwise, False for counterclockwise. Default is True.
         """
         if clockwise:
             GPIO.output(DIR, CW)

@@ -1,5 +1,15 @@
+"""
+!!! warning. Needs to be reimplemented !!!
+"""
+
+from imptube import Measurement, Sample
+from imptube.pistepper import PiStepper
+import os
+import numpy as np
+from time import sleep
+
 def single_depth_measurement(
-        sample,
+        sample : Sample,
         measurement,
         depth,
         resolution = "1/4",
@@ -16,12 +26,12 @@ def single_depth_measurement(
         p.enable()
         p.turn(abs(pre_cycles), pre_direction)
         p.disable()
-        self.position = depth
+        sample.position = depth
 
     running = True
     while running:
         for s in range(m.sub_measurements):
-            f = os.path.join(self.trees[4][0], self.trees[1]+f"_wav_d{depth}_{s}.wav")
+            f = os.path.join(m.trees[4][0], m.trees[1]+f"_wav_d{depth}_{s}.wav")
             m.measure(f, thd_filter=thd_filter)
             sleep(0.5)
         if input("Repeat measurement? [y/N]").lower() == "y":
