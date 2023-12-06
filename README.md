@@ -14,6 +14,10 @@ It requires several Python packages to be installed:
 
 It is currently not possible to install this library using `pip` or `conda`, please use the latest [released package](https://github.com/vyhyb/imptube/releases) instead and install using [`pip` locally](https://packaging.python.org/en/latest/tutorials/installing-packages/).
 
+## Documentation
+
+Documentation can be found [here](https://vyhyb.github.io/imptube/)
+
 ## Usage
 
 The library currently provides two ways to perform a measurement.
@@ -40,7 +44,7 @@ measurement = imp.Measurement(device=15)  # Create an instance of the Measuremen
 # Perform the configuration 1 measurement
 data, fs = measurement.measure(export=False, thd_filter=True)  
 p11, p12 = imp.stereo_to_spectra(data.T)
-freqs = imp.frequencies(p11, fs)
+freqs = imp.frequencies(p11, fs)https://vyhyb.github.io/imptube/
 
 input("Ready to measure in the second configuration?") 
 
