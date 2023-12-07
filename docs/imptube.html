@@ -26,6 +26,7 @@
   <li><a href="#installation">Installation</a></li>
   <li><a href="#usage">Usage</a></li>
   <li><a href="#acknowledgments">Acknowledgments</a></li>
+  <li><a href="#author">Author</a></li>
   <li><a href="#contributing">Contributing</a></li>
   <li><a href="#license">License</a></li>
 </ul>
@@ -33,10 +34,10 @@
 
             <h2>Submodules</h2>
             <ul>
-                    <li><a href="imptube/tube.html">tube</a></li>
-                    <li><a href="imptube/processing.html">processing</a></li>
-                    <li><a href="imptube/movable_termination.html">movable_termination</a></li>
-                    <li><a href="imptube/pistepper.html">pistepper</a></li>
+                <li><a href="imptube/tube.html">tube</a></li>
+                <li><a href="imptube/processing.html">processing</a></li>
+                <li><a href="imptube/movable_termination.html">movable_termination</a></li>
+                <li><a href="imptube/pistepper.html">pistepper</a></li>
             </ul>
 
 
@@ -157,7 +158,18 @@ imptube    </h1>
 
 <h2 id="acknowledgments">Acknowledgments</h2>
 
-<p>This library was created thanks to the <a href="https://www.vut.cz/vav/projekty/detail/32738">FAST-J-21-7481</a> and <a href="https://www.vut.cz/vav/projekty/detail/33840">FAST-J-22-7880</a> projects.</p>
+<p>This library was created thanks to the <a href="https://www.vut.cz/vav/projekty/detail/33840">FAST-J-22-7880</a> project.</p>
+
+<p>Special thanks to prof. Christ Glorieux for his help with the theory.</p>
+
+<p>Github Copilot was used to generate parts of the documentation and code.</p>
+
+<h2 id="author">Author</h2>
+
+<ul>
+<li><a href="https://www.fce.vutbr.cz/o-fakulte/lide/david-jun-12801/">David Jun</a>
+PhD student at <a href="https://www.vutbr.cz/en/">Brno University of Technology</a></li>
+</ul>
 
 <h2 id="contributing">Contributing</h2>
 
@@ -276,42 +288,52 @@ to discuss what you would like to change.</p>
 </span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a><span class="sd">```</span>
 </span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a><span class="sd">## Acknowledgments</span>
 </span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>
-</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a><span class="sd">This library was created thanks to the [FAST-J-21-7481](https://www.vut.cz/vav/projekty/detail/32738) and [FAST-J-22-7880](https://www.vut.cz/vav/projekty/detail/33840) projects.</span>
+</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a><span class="sd">This library was created thanks to the [FAST-J-22-7880](https://www.vut.cz/vav/projekty/detail/33840) project.</span>
 </span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>
-</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a><span class="sd">## Contributing</span>
+</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a><span class="sd">Special thanks to prof. Christ Glorieux for his help with the theory.</span>
 </span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>
-</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a><span class="sd">Pull requests are welcome. For any changes, please open an issue first</span>
-</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a><span class="sd">to discuss what you would like to change.</span>
-</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>
-</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a><span class="sd">Please make sure to update tests as appropriate.</span>
-</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>
-</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a><span class="sd">## License</span>
+</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a><span class="sd">Github Copilot was used to generate parts of the documentation and code.</span>
+</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>
+</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a><span class="sd">## Author</span>
+</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a><span class="sd">- [David Jun](https://www.fce.vutbr.cz/o-fakulte/lide/david-jun-12801/)</span>
+</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a><span class="sd">  PhD student at [Brno University of Technology](https://www.vutbr.cz/en/)</span>
 </span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>
-</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a><span class="sd">[MIT](https://choosealicense.com/licenses/mit/)</span>
-</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a><span class="kn">from</span> <span class="nn">.tube</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>    <span class="n">Tube</span><span class="p">,</span> 
-</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>    <span class="n">Measurement</span><span class="p">,</span> 
-</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>    <span class="n">Sample</span><span class="p">,</span> 
-</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>    <span class="n">single_measurement</span><span class="p">,</span> 
-</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>    <span class="n">calculate_alpha</span><span class="p">,</span> 
-</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>    <span class="n">calibration</span>
-</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a><span class="p">)</span>
+</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a><span class="sd">## Contributing</span>
+</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>
+</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a><span class="sd">Pull requests are welcome. For any changes, please open an issue first</span>
+</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a><span class="sd">to discuss what you would like to change.</span>
+</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>
+</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a><span class="sd">Please make sure to update tests as appropriate.</span>
+</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>
+</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a><span class="sd">## License</span>
+</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>
+</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a><span class="sd">[MIT](https://choosealicense.com/licenses/mit/)</span>
 </span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>
-</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a><span class="kn">from</span> <span class="nn">.processing.signal_proc</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>    <span class="n">read_audio</span><span class="p">,</span> 
-</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>    <span class="n">separate_mono</span><span class="p">,</span> 
-</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>    <span class="n">stereo_to_spectra</span><span class="p">,</span> 
-</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>    <span class="n">calibration_factor</span><span class="p">,</span> 
-</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a>    <span class="n">transfer_function</span><span class="p">,</span> 
-</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>    <span class="n">tf_i_r</span><span class="p">,</span> 
-</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>    <span class="n">frequencies</span><span class="p">,</span> 
-</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>    <span class="n">reflection_factor</span><span class="p">,</span> 
-</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>    <span class="n">absorption_coefficient</span><span class="p">,</span> 
-</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>    <span class="n">surface_impedance</span>
-</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a><span class="p">)</span>
-</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>
-</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a><span class="kn">from</span> <span class="nn">.processing.files</span> <span class="kn">import</span> <span class="n">read_file</span>
+</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a><span class="kn">from</span> <span class="nn">.tube</span> <span class="kn">import</span> <span class="p">(</span>
+</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>    <span class="n">Tube</span><span class="p">,</span> 
+</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>    <span class="n">Measurement</span><span class="p">,</span> 
+</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>    <span class="n">Sample</span><span class="p">,</span> 
+</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a>    <span class="n">single_measurement</span><span class="p">,</span> 
+</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>    <span class="n">calculate_alpha</span><span class="p">,</span> 
+</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>    <span class="n">calibration</span>
+</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a><span class="p">)</span>
+</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>
+</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a><span class="kn">from</span> <span class="nn">.processing.signal_proc</span> <span class="kn">import</span> <span class="p">(</span>
+</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>    <span class="n">read_audio</span><span class="p">,</span> 
+</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>    <span class="n">separate_mono</span><span class="p">,</span> 
+</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>    <span class="n">stereo_to_spectra</span><span class="p">,</span> 
+</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>    <span class="n">calibration_factor</span><span class="p">,</span> 
+</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a>    <span class="n">transfer_function</span><span class="p">,</span> 
+</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a>    <span class="n">tf_i_r</span><span class="p">,</span> 
+</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a>    <span class="n">frequencies</span><span class="p">,</span> 
+</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a>    <span class="n">reflection_factor</span><span class="p">,</span> 
+</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>    <span class="n">absorption_coefficient</span><span class="p">,</span> 
+</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>    <span class="n">surface_impedance</span>
+</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a><span class="p">)</span>
+</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>
+</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a><span class="kn">from</span> <span class="nn">.processing.files</span> <span class="kn">import</span> <span class="n">read_file</span>
 </span></pre></div>
 
 

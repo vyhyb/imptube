@@ -99,7 +99,16 @@ imp.single_measurement(
 ```
 ## Acknowledgments
 
-This library was created thanks to the [FAST-J-21-7481](https://www.vut.cz/vav/projekty/detail/32738) and [FAST-J-22-7880](https://www.vut.cz/vav/projekty/detail/33840) projects.
+This library was created thanks to the [FAST-J-22-7880](https://www.vut.cz/vav/projekty/detail/33840) project.
+
+Special thanks to prof. Christ Glorieux for his help with the theory.
+
+Github Copilot was used to generate parts of the documentation and code.
+
+## Author
+
+- [David Jun](https://www.fce.vutbr.cz/o-fakulte/lide/david-jun-12801/)
+  PhD student at [Brno University of Technology](https://www.vutbr.cz/en/)
 
 ## Contributing
 
@@ -111,6 +120,7 @@ Please make sure to update tests as appropriate.
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
+
 """
 from .tube import (
     Tube, 
