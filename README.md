@@ -112,7 +112,7 @@ Github Copilot was used to generate parts of the documentation and code.
 
 - [David Jun](https://www.fce.vutbr.cz/o-fakulte/lide/david-jun-12801/)
   
-  PhD student at [Brno University of Technology](https://www.vutbr.cz/en/)
+  PhD student at [Brno University of Technology](https://www.vutbr.cz/en/) and [KU Leuven](https://www.kuleuven.be/english/)
 
 ## Contributing
 
