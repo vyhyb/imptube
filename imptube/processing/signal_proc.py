@@ -195,7 +195,7 @@ def calc_char_impedance_air(temperature : float, atm_pressure : float) -> float:
     Returns
     -------
     float
-        The characteristic impedance of air in ohms.
+        The characteristic impedance of air.
     """
     char_impedance = NORMAL_DENSITY*(
         (atm_pressure*NORMAL_TEMPERATURE)/(NORMAL_PRESSURE*(temperature+273))
@@ -275,7 +275,7 @@ def reflection_factor(
     freqs : np.ndarray
         The frequencies at which the reflection factor is calculated.
     x1 : float
-        The distance between the incident and reflected waves.
+        The distance between the sample and the first microphone position.
 
     Returns
     -------
