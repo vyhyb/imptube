@@ -376,7 +376,7 @@ def single_measurement(
 
     if calc_spl:
         rms_spl = calc_rms_pressure_level(data.T[0], m.fs_to_spl)
-        logging.INFO(f"RMS SPL: {rms_spl} dB")
+        logging.info(f"RMS SPL: {rms_spl} dB")
         m.rms_spl = rms_spl
     return sub_measurement_data, fs
 
