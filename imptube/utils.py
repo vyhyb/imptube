@@ -98,9 +98,10 @@ def make_foldertree(
     measuretrees = [
         os.path.join(measuretree, "audio"),
         os.path.join(measuretree, "transfer_func"),
-        # os.path.join(measuretree, "impedance"),
+        os.path.join(measuretree, "impedance"),
         # os.path.join(measuretree, "wave_number"),
         os.path.join(measuretree, "alpha"),
+        os.path.join(measuretree, "refl_factor"),
         os.path.join(measuretree, "fig"),
         os.path.join(measuretree, "fig", "impedance"),
         os.path.join(measuretree, "fig", "wave_number"),

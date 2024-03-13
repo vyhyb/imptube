@@ -404,6 +404,22 @@ def alpha_from_path(
                 parent_folder, "measurement", "alpha", os.path.split(parent_folder)[1]+"_freqs.npy"
         )
     )
+
+    # save all reflection factors
+    for r, p in zip(rfs, tf_paths):
+        # print(p)
+        idx = str(p).rfind("d")
+        np.save(arr=r,
+            file=os.path.join(
+                parent_folder, "measurement", "refl_factor", os.path.split(parent_folder)[1]+"_refl_factor_"+str(p)[idx:-4]+".npy"
+            )
+        )
+    np.save(arr=freqs, file=os.path.join(
+                parent_folder, "measurement", "refl_factor", os.path.split(parent_folder)[1]+"_freqs.npy"
+        )
+    )
+    
+    # save all impedances
     for i, p in zip(impedances, tf_paths):
         # print(p)
         idx = str(p).rfind("d")
