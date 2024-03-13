@@ -274,7 +274,7 @@ def transfer_function_from_path(
     tf_folder = os.path.join(parent_folder, "measurement", "transfer_func")
     audio_files = read_folder(audio_folder)
     fs, a = read_file(audio_files[0])
-    limit_idx = int(fftfreq(a.shape(0), 1/fs)[1]*limit)
+    limit_idx = int(limit/fftfreq(a.shape[0], 1/fs)[1])
     audio_files_d_filtered = []
     for f in audio_files:
         idx1 = f.rfind("d")
