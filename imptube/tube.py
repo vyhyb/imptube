@@ -381,7 +381,9 @@ def single_measurement(
     return sub_measurement_data, fs
 
 def calculate_alpha(
-        sample : Sample
+        sample : Sample,
+        return_r : bool = False,
+        return_z : bool = False,
         ) -> tuple[np.ndarray, np.ndarray]:
     """Performs transfer function and alpha calculations from audio data
     found in a valid folder structure.
@@ -399,8 +401,13 @@ def calculate_alpha(
         frequency values for the alpha array
     """
     sample.unique_d, sample.tfs = transfer_function_from_path(sample.trees[2])
-    sample.alpha, sample.freqs = alpha_from_path(sample.trees[2], return_f=True)
-    return sample.alpha, sample.freqs
+    results = alpha_from_path(
+        sample.trees[2],
+        return_f=True,
+        return_r=return_r,
+        return_z=return_z,
+        atm_pressure=sample.atm_pressure)
+    return results
 
 class Sensor(Protocol):
     """A protocol for Sensor class implementation."""

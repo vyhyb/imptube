@@ -13,7 +13,8 @@ from .signal_proc import (
     transfer_function, 
     calibration_factor, 
     reflection_factor, 
-    absorption_coefficient, 
+    absorption_coefficient,
+    surface_impedance,
     tf_i_r
 )
 from ..utils import filter, read_folder
@@ -296,7 +297,10 @@ def alpha_from_path(
         cal : np.ndarray=None, 
         tfs : np.ndarray=None, 
         bc : pd.DataFrame=None, 
-        return_f : bool=False
+        return_f : bool=False,
+        return_r : bool=False,
+        return_z : bool=False,
+        atm_pressure : float=None
         ) -> tuple[np.ndarray, np.ndarray]:
     """Calculate the absorption coefficient from the given parent folder path.
 
@@ -314,6 +318,10 @@ def alpha_from_path(
         The boundary conditions, by default None.
     return_f : bool, optional
         Whether to return the absorption coefficient and frequencies, by default False.
+    return_r : bool, optional
+        Whether to return the reflection factor, by default False.
+    return_z : bool, optional
+        Whether to return the impedance, by default False.
 
     Returns
     -------
@@ -331,7 +339,13 @@ def alpha_from_path(
     x2_dist = bc_df["x2"].iloc[0]
     limit = int(bc_df["lim"].iloc[0])
     s_dist = x1_dist - x2_dist
-
+    try:
+        atm_pressure = bc_df["atm_pressure"].iloc[0]
+    except:
+        Exception("atm_pressure not provided with boundary condition file.")
+    if return_z and atm_pressure is None:
+        raise Exception("You need to provide valid atmospheric pressure to calculate surface impedance.")
+    print(f"atm pressure: {atm_pressure}")
     # read calibration transfer function
     if cal is None:
         tf_cal = np.load(
@@ -344,7 +358,7 @@ def alpha_from_path(
     else:
         tf_cal = cal
     freqs = load_freqs(parent_folder)
-    limit_idx = int(freqs[1]*limit)
+    limit_idx = int(limit/freqs[1])
     tf_cal = tf_cal[:limit_idx]
     freqs = freqs[:limit_idx]
 
@@ -352,6 +366,7 @@ def alpha_from_path(
     tf_paths = read_folder(
         os.path.join(parent_folder, "measurement", "transfer_func")
     )
+    tf_paths = sorted(tf_paths)
     # print(tf_paths)
     if tfs is None:
         tfs = []
@@ -365,16 +380,20 @@ def alpha_from_path(
 
     # calculate reflection factor and absorption coefficient
     rfs = []
+    impedances = []
     for t in tfs:
         tf_corrected = t/tf_cal
         rfs.append(reflection_factor(tf_incident, tf_reflected, tf_corrected, temp_c, freqs, x1_dist))
     alpha_n = []
     for r in rfs:
         alpha_n.append(absorption_coefficient(r))
-
+    
+    if return_z:
+        for r in rfs:
+            impedances.append(surface_impedance(r, temp_c, atm_pressure))
     # save all alpha courses
     for a, p in zip(alpha_n, tf_paths):
-        print(p)
+        # print(p)
         idx = str(p).rfind("d")
         np.save(arr=a,
             file=os.path.join(
@@ -385,8 +404,26 @@ def alpha_from_path(
                 parent_folder, "measurement", "alpha", os.path.split(parent_folder)[1]+"_freqs.npy"
         )
     )
-    if return_f == True:
-        ret = (alpha_n, freqs)
-    else:
-        ret = alpha_n
-    return ret
+    for i, p in zip(impedances, tf_paths):
+        # print(p)
+        idx = str(p).rfind("d")
+        np.save(arr=i,
+            file=os.path.join(
+                parent_folder, "measurement", "impedance", os.path.split(parent_folder)[1]+"_impedance_"+str(p)[idx:-4]+".npy"
+            )
+        )
+    np.save(arr=freqs, file=os.path.join(
+                parent_folder, "measurement", "impedance", os.path.split(parent_folder)[1]+"_freqs.npy"
+        )
+    )
+
+    
+    ret = [alpha_n]
+    if return_f:
+        ret = [alpha_n, freqs]
+    if return_r:
+        ret.append(rfs)
+    if return_z:
+        ret.append(impedances)
+        
+    return tuple(ret)
