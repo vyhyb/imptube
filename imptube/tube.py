@@ -226,6 +226,7 @@ class Sample:
             name : str,
             temperature : float,
             rel_humidity : float,
+            atm_pressure : float = 101325,
             tube : Tube=Tube(),
             timestamp : str = strftime("%y-%m-%d_%H-%M"),
             folder = "data",
@@ -233,6 +234,7 @@ class Sample:
         self.name = name
         self.timestamp = timestamp
         self.temperature = temperature
+        self.atm_pressure = atm_pressure
         self.rel_humidity = rel_humidity
         self.tube = tube
         self.folder = folder
@@ -244,6 +246,7 @@ class Sample:
         bound_dict = {
             'temp': [self.temperature],
             'RH': [self.rel_humidity],
+            'atm_pressure': [self.atm_pressure],
             'x1': [self.tube.further_mic_dist],
             'x2': [self.tube.closer_mic_dist],
             'lim': [self.tube.freq_limit],
@@ -406,19 +409,23 @@ class Sensor(Protocol):
     
     def read_humidity(self) -> float:
         ...
+
+    def read_pressure(self) -> float:
+        ...
     
-def read_env_bc(sensor : Sensor) -> tuple[float, float]:
+def read_env_bc(sensor : Sensor) -> tuple[float, float, float]:
     for i in range(5):
         try:
             temperature = sensor.read_temperature()
             rel_humidity = sensor.read_humidity()
+            atm_pressure = sensor.read_pressure()
             break
         except:
             print(f"Reading {i+1} not succesful.")
         if i == 4:
             print("Unable to read data from sensor, try manually enter temperature and RH on initialization.")
             sys.exit()
-    return temperature, rel_humidity
+    return temperature, rel_humidity, atm_pressure
 
     #  TODO save bc as config file...
     #  bound_dict = {
