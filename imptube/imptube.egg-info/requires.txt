@@ -3,6 +3,7 @@ soundfile
 scipy
 numpy
 pandas
+logging
 
 [dev]
 pytest

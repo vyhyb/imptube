@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: imptube
-Version: 0.0.2
+Version: 0.0.3
 Summary: A package for impedance tube measurements.
 Home-page: https://github.com/vyhyb/imptube/tree/main
 Author: David Jun
@@ -28,7 +28,11 @@ It requires several Python packages to be installed:
 
 ## Installation
 
-It is currently not possible to install this library using `pip` or `conda`, please use the latest released package instead and install using [`pip` locally](https://packaging.python.org/en/latest/tutorials/installing-packages/).
+It is currently not possible to install this library using `pip` or `conda`, please use the latest [released package](https://github.com/vyhyb/imptube/releases) instead and install using [`pip` locally](https://packaging.python.org/en/latest/tutorials/installing-packages/).
+
+## Documentation
+
+Documentation can be found [here](https://vyhyb.github.io/imptube/)
 
 ## Usage
 
@@ -42,7 +46,7 @@ This method shows the inner logic of the whole measurement. In contrast to the s
 import imptube as imp
 
 temp = 29  # Temperature in degrees Celsius
-humidity = 30  # Humidity level in percentage
+humidity = 30  # Relative humidity in percent
 atm_pressure = 101300  # Atmospheric pressure in Pascal
 
 tube = imp.Tube(
@@ -56,7 +60,7 @@ measurement = imp.Measurement(device=15)  # Create an instance of the Measuremen
 # Perform the configuration 1 measurement
 data, fs = measurement.measure(export=False, thd_filter=True)  
 p11, p12 = imp.stereo_to_spectra(data.T)
-freqs = imp.frequencies(p11, fs)
+freqs = imp.frequencies(p11, fs)https://vyhyb.github.io/imptube/
 
 input("Ready to measure in the second configuration?") 
 
@@ -111,6 +115,20 @@ imp.single_measurement(
     depth=160
 )
 ```
+
+## Acknowledgments
+
+This library was created thanks to the [FAST-J-22-7880](https://www.vut.cz/vav/projekty/detail/33840) project.
+
+Special thanks to Prof. Christ Glorieux for his help with the theory.
+
+Github Copilot was used to generate parts of the documentation and code.
+
+## Author
+
+- [David Jun](https://www.fce.vutbr.cz/o-fakulte/lide/david-jun-12801/)
+  
+  PhD student at [Brno University of Technology](https://www.vutbr.cz/en/) and [KU Leuven](https://www.kuleuven.be/english/)
 
 ## Contributing
 
