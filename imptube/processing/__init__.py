@@ -13,3 +13,7 @@ from .files import (
 from .filters import (
     harmonic_distortion_filter
 )
+
+from .signal_proc import (
+    calc_rms_pressure_level
+)

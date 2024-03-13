@@ -164,6 +164,42 @@ def calibration_factor(
     """
     return transfer_function(p11, p12) / transfer_function(p22, p21)
 
+def calc_rms_fs(p1 : np.ndarray) -> float:
+    """Calculate the root mean square (RMS) value of a signal.
+
+    Parameters
+    ----------
+    p1 : np.ndarray
+        The input signal.
+
+    Returns
+    -------
+    float
+        The RMS value of the input signal.
+    """
+    return np.sqrt(np.mean(p1**2))
+
+def calc_rms_pressure_level(
+        p1 : np.ndarray,
+        fs_to_spl : float
+    ) -> float:
+    """Calculate the RMS pressure level of a signal.
+
+    Parameters
+    ----------
+    p1 : np.ndarray
+        The input signal.
+    fs_to_spl : float
+        The conversion factor (in dB) from full scale to sound pressure level.
+
+    Returns
+    -------
+    float
+        The RMS pressure level of the input signal.
+    """
+    fs_to_spl_factor = 10**(fs_to_spl/20)
+    return 20 * np.log10(calc_rms_fs(p1) * fs_to_spl_factor)
+
 def calc_speed_sound(tempC : float) -> float:
     """Calculate the speed of sound in air at a given temperature.
 

@@ -15,8 +15,11 @@ from imptube.processing import (
     calibration_from_files,
     transfer_function_from_path,
     alpha_from_path,
-    harmonic_distortion_filter)
+    harmonic_distortion_filter,
+    calc_rms_pressure_level
+)
 from typing import Protocol
+import logging
 
 
 class Measurement:
@@ -48,6 +51,8 @@ class Measurement:
         lower frequency limit for the generated sweep
     f_high : int
         higher frequency limit for the generated sweep
+    fs_to_spl : float
+        conversion level from dBFS to dB SPL for microphone 1
     """
 
     def __init__(
@@ -60,7 +65,9 @@ class Measurement:
             window_len : int=8192,
             sub_measurements : int=2,
             f_low : int=10,
-            f_high : int=1000):
+            f_high : int=1000,
+            fs_to_spl : float=130  
+        ):
         self.channels_in = channels_in
         self.channels_out = channels_out
         self.device = device
@@ -68,6 +75,7 @@ class Measurement:
         self.sub_measurements = sub_measurements
         self.samples = samples
         self.f_limits = [f_low, f_high]
+        self.fs_to_spl = fs_to_spl
 
         self.sweep = self.make_sweep(
             samples=samples,
@@ -239,6 +247,7 @@ class Sample:
             'x1': [self.tube.further_mic_dist],
             'x2': [self.tube.closer_mic_dist],
             'lim': [self.tube.freq_limit],
+            'dbfs_to_spl': [130],
             }
         self.boundary_df = pd.DataFrame(bound_dict)
         self.boundary_df.to_csv(
@@ -330,7 +339,8 @@ def single_measurement(
         sample : Sample,
         measurement : Measurement,
         depth : float,
-        thd_filter : bool= True
+        thd_filter : bool= True,
+        calc_spl : bool = True
         ) -> tuple[list[np.ndarray], int]:
     """Performs measurement.
     
@@ -360,6 +370,11 @@ def single_measurement(
         data, fs = m.measure(f, thd_filter=thd_filter)
         sub_measurement_data.append(data)
         sleep(0.5)
+
+    if calc_spl:
+        rms_spl = calc_rms_pressure_level(data.T[0], m.fs_to_spl)
+        logging.INFO(f"RMS SPL: {rms_spl} dB")
+        m.rms_spl = rms_spl
     return sub_measurement_data, fs
 
 def calculate_alpha(
