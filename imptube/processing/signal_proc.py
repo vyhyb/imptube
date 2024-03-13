@@ -162,7 +162,7 @@ def calibration_factor(
         The calibration factor as an array.
 
     """
-    return transfer_function(p11, p12) / transfer_function(p22, p21)
+    return np.sqrt(transfer_function(p11, p12) / transfer_function(p22, p21))
 
 def calc_rms_fs(p1 : np.ndarray) -> float:
     """Calculate the root mean square (RMS) value of a signal.
