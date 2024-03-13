@@ -301,7 +301,7 @@ def alpha_from_path(
         return_r : bool=False,
         return_z : bool=False,
         atm_pressure : float=None
-        ) -> tuple[np.ndarray, np.ndarray]:
+        ) -> tuple[np.ndarray]:
     """Calculate the absorption coefficient from the given parent folder path.
 
     Parameters
@@ -325,7 +325,7 @@ def alpha_from_path(
 
     Returns
     -------
-    tuple[np.ndarray, np.ndarray] or np.ndarray
+    tuple[np.ndarray] or np.ndarray
         If return_f is True, returns a tuple containing the absorption coefficient and frequencies.
         Otherwise, returns only the absorption coefficient.
     """
@@ -418,7 +418,7 @@ def alpha_from_path(
                 parent_folder, "measurement", "refl_factor", os.path.split(parent_folder)[1]+"_freqs.npy"
         )
     )
-    
+
     # save all impedances
     for i, p in zip(impedances, tf_paths):
         # print(p)

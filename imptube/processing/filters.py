@@ -215,4 +215,4 @@ def harmonic_distortion_filter(
     pf_1_time = np.fft.ifft(pf_1)[:int(len(p_ref)/2)]
     pf_2_time = np.fft.ifft(pf_2)[:int(len(p_ref)/2)]
 
-    return np.asarray([pf_1_time, pf_2_time]).astype(np.float32)
+    return np.asarray([pf_1_time, pf_2_time]).real
