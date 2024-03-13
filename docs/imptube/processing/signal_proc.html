@@ -55,6 +55,12 @@
                     <a class="function" href="#calibration_factor">calibration_factor</a>
             </li>
             <li>
+                    <a class="function" href="#calc_rms_fs">calc_rms_fs</a>
+            </li>
+            <li>
+                    <a class="function" href="#calc_rms_pressure_level">calc_rms_pressure_level</a>
+            </li>
+            <li>
                     <a class="function" href="#calc_speed_sound">calc_speed_sound</a>
             </li>
             <li>
@@ -264,169 +270,205 @@
 </span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a>    <span class="k">return</span> <span class="n">transfer_function</span><span class="p">(</span><span class="n">p11</span><span class="p">,</span> <span class="n">p12</span><span class="p">)</span> <span class="o">/</span> <span class="n">transfer_function</span><span class="p">(</span><span class="n">p22</span><span class="p">,</span> <span class="n">p21</span><span class="p">)</span>
 </span><span id="L-166"><a href="#L-166"><span class="linenos">166</span></a>
-</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a><span class="k">def</span> <span class="nf">calc_speed_sound</span><span class="p">(</span><span class="n">tempC</span> <span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the speed of sound in air at a given temperature.</span>
+</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a><span class="k">def</span> <span class="nf">calc_rms_fs</span><span class="p">(</span><span class="n">p1</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the root mean square (RMS) value of a signal.</span>
 </span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a>
 </span><span id="L-170"><a href="#L-170"><span class="linenos">170</span></a><span class="sd">    Parameters</span>
 </span><span id="L-171"><a href="#L-171"><span class="linenos">171</span></a><span class="sd">    ----------</span>
-</span><span id="L-172"><a href="#L-172"><span class="linenos">172</span></a><span class="sd">    tempC : float</span>
-</span><span id="L-173"><a href="#L-173"><span class="linenos">173</span></a><span class="sd">        The temperature in degrees Celsius.</span>
+</span><span id="L-172"><a href="#L-172"><span class="linenos">172</span></a><span class="sd">    p1 : np.ndarray</span>
+</span><span id="L-173"><a href="#L-173"><span class="linenos">173</span></a><span class="sd">        The input signal.</span>
 </span><span id="L-174"><a href="#L-174"><span class="linenos">174</span></a>
 </span><span id="L-175"><a href="#L-175"><span class="linenos">175</span></a><span class="sd">    Returns</span>
 </span><span id="L-176"><a href="#L-176"><span class="linenos">176</span></a><span class="sd">    -------</span>
 </span><span id="L-177"><a href="#L-177"><span class="linenos">177</span></a><span class="sd">    float</span>
-</span><span id="L-178"><a href="#L-178"><span class="linenos">178</span></a><span class="sd">        The speed of sound in meters per second.</span>
+</span><span id="L-178"><a href="#L-178"><span class="linenos">178</span></a><span class="sd">        The RMS value of the input signal.</span>
 </span><span id="L-179"><a href="#L-179"><span class="linenos">179</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-180"><a href="#L-180"><span class="linenos">180</span></a>    <span class="k">return</span> <span class="mf">343.2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">tempC</span><span class="o">+</span><span class="mi">273</span><span class="p">)</span> <span class="o">/</span> <span class="n">NORMAL_TEMPERATURE</span><span class="p">)</span>
+</span><span id="L-180"><a href="#L-180"><span class="linenos">180</span></a>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">p1</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
 </span><span id="L-181"><a href="#L-181"><span class="linenos">181</span></a>
-</span><span id="L-182"><a href="#L-182"><span class="linenos">182</span></a><span class="k">def</span> <span class="nf">calc_char_impedance_air</span><span class="p">(</span><span class="n">temperature</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">atm_pressure</span> <span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span id="L-183"><a href="#L-183"><span class="linenos">183</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the characteristic impedance of air.</span>
-</span><span id="L-184"><a href="#L-184"><span class="linenos">184</span></a>
-</span><span id="L-185"><a href="#L-185"><span class="linenos">185</span></a><span class="sd">    This function calculates the characteristic impedance of air based on </span>
-</span><span id="L-186"><a href="#L-186"><span class="linenos">186</span></a><span class="sd">    the given temperature and atmospheric pressure.</span>
+</span><span id="L-182"><a href="#L-182"><span class="linenos">182</span></a><span class="k">def</span> <span class="nf">calc_rms_pressure_level</span><span class="p">(</span>
+</span><span id="L-183"><a href="#L-183"><span class="linenos">183</span></a>        <span class="n">p1</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+</span><span id="L-184"><a href="#L-184"><span class="linenos">184</span></a>        <span class="n">fs_to_spl</span> <span class="p">:</span> <span class="nb">float</span>
+</span><span id="L-185"><a href="#L-185"><span class="linenos">185</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span id="L-186"><a href="#L-186"><span class="linenos">186</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the RMS pressure level of a signal.</span>
 </span><span id="L-187"><a href="#L-187"><span class="linenos">187</span></a>
 </span><span id="L-188"><a href="#L-188"><span class="linenos">188</span></a><span class="sd">    Parameters</span>
 </span><span id="L-189"><a href="#L-189"><span class="linenos">189</span></a><span class="sd">    ----------</span>
-</span><span id="L-190"><a href="#L-190"><span class="linenos">190</span></a><span class="sd">    temperature : float</span>
-</span><span id="L-191"><a href="#L-191"><span class="linenos">191</span></a><span class="sd">        The temperature of the air in degrees Celsius.</span>
-</span><span id="L-192"><a href="#L-192"><span class="linenos">192</span></a><span class="sd">    atm_pressure : float</span>
-</span><span id="L-193"><a href="#L-193"><span class="linenos">193</span></a><span class="sd">        The atmospheric pressure in pascals.</span>
+</span><span id="L-190"><a href="#L-190"><span class="linenos">190</span></a><span class="sd">    p1 : np.ndarray</span>
+</span><span id="L-191"><a href="#L-191"><span class="linenos">191</span></a><span class="sd">        The input signal.</span>
+</span><span id="L-192"><a href="#L-192"><span class="linenos">192</span></a><span class="sd">    fs_to_spl : float</span>
+</span><span id="L-193"><a href="#L-193"><span class="linenos">193</span></a><span class="sd">        The conversion factor (in dB) from full scale to sound pressure level.</span>
 </span><span id="L-194"><a href="#L-194"><span class="linenos">194</span></a>
 </span><span id="L-195"><a href="#L-195"><span class="linenos">195</span></a><span class="sd">    Returns</span>
 </span><span id="L-196"><a href="#L-196"><span class="linenos">196</span></a><span class="sd">    -------</span>
 </span><span id="L-197"><a href="#L-197"><span class="linenos">197</span></a><span class="sd">    float</span>
-</span><span id="L-198"><a href="#L-198"><span class="linenos">198</span></a><span class="sd">        The characteristic impedance of air in ohms.</span>
+</span><span id="L-198"><a href="#L-198"><span class="linenos">198</span></a><span class="sd">        The RMS pressure level of the input signal.</span>
 </span><span id="L-199"><a href="#L-199"><span class="linenos">199</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-200"><a href="#L-200"><span class="linenos">200</span></a>    <span class="n">char_impedance</span> <span class="o">=</span> <span class="n">NORMAL_DENSITY</span><span class="o">*</span><span class="p">(</span>
-</span><span id="L-201"><a href="#L-201"><span class="linenos">201</span></a>        <span class="p">(</span><span class="n">atm_pressure</span><span class="o">*</span><span class="n">NORMAL_TEMPERATURE</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">NORMAL_PRESSURE</span><span class="o">*</span><span class="p">(</span><span class="n">temperature</span><span class="o">+</span><span class="mi">273</span><span class="p">))</span>
-</span><span id="L-202"><a href="#L-202"><span class="linenos">202</span></a>    <span class="p">)</span>
-</span><span id="L-203"><a href="#L-203"><span class="linenos">203</span></a>    <span class="k">return</span> <span class="n">char_impedance</span>
-</span><span id="L-204"><a href="#L-204"><span class="linenos">204</span></a>
-</span><span id="L-205"><a href="#L-205"><span class="linenos">205</span></a><span class="k">def</span> <span class="nf">k_0</span><span class="p">(</span><span class="n">speed_sound</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">freqs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span id="L-206"><a href="#L-206"><span class="linenos">206</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-207"><a href="#L-207"><span class="linenos">207</span></a><span class="sd">    Calculate the wavenumber for a given speed of sound and frequencies.</span>
-</span><span id="L-208"><a href="#L-208"><span class="linenos">208</span></a>
-</span><span id="L-209"><a href="#L-209"><span class="linenos">209</span></a><span class="sd">    Parameters</span>
-</span><span id="L-210"><a href="#L-210"><span class="linenos">210</span></a><span class="sd">    ----------</span>
-</span><span id="L-211"><a href="#L-211"><span class="linenos">211</span></a><span class="sd">    speed_sound : float</span>
-</span><span id="L-212"><a href="#L-212"><span class="linenos">212</span></a><span class="sd">        The speed of sound.</span>
-</span><span id="L-213"><a href="#L-213"><span class="linenos">213</span></a><span class="sd">    freqs : np.ndarray</span>
-</span><span id="L-214"><a href="#L-214"><span class="linenos">214</span></a><span class="sd">        An array of frequencies.</span>
-</span><span id="L-215"><a href="#L-215"><span class="linenos">215</span></a>
-</span><span id="L-216"><a href="#L-216"><span class="linenos">216</span></a><span class="sd">    Returns</span>
-</span><span id="L-217"><a href="#L-217"><span class="linenos">217</span></a><span class="sd">    -------</span>
-</span><span id="L-218"><a href="#L-218"><span class="linenos">218</span></a><span class="sd">    np.ndarray</span>
-</span><span id="L-219"><a href="#L-219"><span class="linenos">219</span></a><span class="sd">        An array of wavenumbers.</span>
-</span><span id="L-220"><a href="#L-220"><span class="linenos">220</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-221"><a href="#L-221"><span class="linenos">221</span></a>    <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">freqs</span> <span class="o">/</span> <span class="n">speed_sound</span>
-</span><span id="L-222"><a href="#L-222"><span class="linenos">222</span></a>
-</span><span id="L-223"><a href="#L-223"><span class="linenos">223</span></a><span class="k">def</span> <span class="nf">tf_i_r</span><span class="p">(</span>
-</span><span id="L-224"><a href="#L-224"><span class="linenos">224</span></a>        <span class="n">temperature</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
-</span><span id="L-225"><a href="#L-225"><span class="linenos">225</span></a>        <span class="n">freqs</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
-</span><span id="L-226"><a href="#L-226"><span class="linenos">226</span></a>        <span class="n">s</span> <span class="p">:</span> <span class="nb">float</span>
-</span><span id="L-227"><a href="#L-227"><span class="linenos">227</span></a>        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-</span><span id="L-228"><a href="#L-228"><span class="linenos">228</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-229"><a href="#L-229"><span class="linenos">229</span></a><span class="sd">    Calculate the transfer functions for the incident and reflected sound.</span>
+</span><span id="L-200"><a href="#L-200"><span class="linenos">200</span></a>    <span class="n">fs_to_spl_factor</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">fs_to_spl</span><span class="o">/</span><span class="mi">20</span><span class="p">)</span>
+</span><span id="L-201"><a href="#L-201"><span class="linenos">201</span></a>    <span class="k">return</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">calc_rms_fs</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span> <span class="o">*</span> <span class="n">fs_to_spl_factor</span><span class="p">)</span>
+</span><span id="L-202"><a href="#L-202"><span class="linenos">202</span></a>
+</span><span id="L-203"><a href="#L-203"><span class="linenos">203</span></a><span class="k">def</span> <span class="nf">calc_speed_sound</span><span class="p">(</span><span class="n">tempC</span> <span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span id="L-204"><a href="#L-204"><span class="linenos">204</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the speed of sound in air at a given temperature.</span>
+</span><span id="L-205"><a href="#L-205"><span class="linenos">205</span></a>
+</span><span id="L-206"><a href="#L-206"><span class="linenos">206</span></a><span class="sd">    Parameters</span>
+</span><span id="L-207"><a href="#L-207"><span class="linenos">207</span></a><span class="sd">    ----------</span>
+</span><span id="L-208"><a href="#L-208"><span class="linenos">208</span></a><span class="sd">    tempC : float</span>
+</span><span id="L-209"><a href="#L-209"><span class="linenos">209</span></a><span class="sd">        The temperature in degrees Celsius.</span>
+</span><span id="L-210"><a href="#L-210"><span class="linenos">210</span></a>
+</span><span id="L-211"><a href="#L-211"><span class="linenos">211</span></a><span class="sd">    Returns</span>
+</span><span id="L-212"><a href="#L-212"><span class="linenos">212</span></a><span class="sd">    -------</span>
+</span><span id="L-213"><a href="#L-213"><span class="linenos">213</span></a><span class="sd">    float</span>
+</span><span id="L-214"><a href="#L-214"><span class="linenos">214</span></a><span class="sd">        The speed of sound in meters per second.</span>
+</span><span id="L-215"><a href="#L-215"><span class="linenos">215</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-216"><a href="#L-216"><span class="linenos">216</span></a>    <span class="k">return</span> <span class="mf">343.2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">tempC</span><span class="o">+</span><span class="mi">273</span><span class="p">)</span> <span class="o">/</span> <span class="n">NORMAL_TEMPERATURE</span><span class="p">)</span>
+</span><span id="L-217"><a href="#L-217"><span class="linenos">217</span></a>
+</span><span id="L-218"><a href="#L-218"><span class="linenos">218</span></a><span class="k">def</span> <span class="nf">calc_char_impedance_air</span><span class="p">(</span><span class="n">temperature</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">atm_pressure</span> <span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span id="L-219"><a href="#L-219"><span class="linenos">219</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the characteristic impedance of air.</span>
+</span><span id="L-220"><a href="#L-220"><span class="linenos">220</span></a>
+</span><span id="L-221"><a href="#L-221"><span class="linenos">221</span></a><span class="sd">    This function calculates the characteristic impedance of air based on </span>
+</span><span id="L-222"><a href="#L-222"><span class="linenos">222</span></a><span class="sd">    the given temperature and atmospheric pressure.</span>
+</span><span id="L-223"><a href="#L-223"><span class="linenos">223</span></a>
+</span><span id="L-224"><a href="#L-224"><span class="linenos">224</span></a><span class="sd">    Parameters</span>
+</span><span id="L-225"><a href="#L-225"><span class="linenos">225</span></a><span class="sd">    ----------</span>
+</span><span id="L-226"><a href="#L-226"><span class="linenos">226</span></a><span class="sd">    temperature : float</span>
+</span><span id="L-227"><a href="#L-227"><span class="linenos">227</span></a><span class="sd">        The temperature of the air in degrees Celsius.</span>
+</span><span id="L-228"><a href="#L-228"><span class="linenos">228</span></a><span class="sd">    atm_pressure : float</span>
+</span><span id="L-229"><a href="#L-229"><span class="linenos">229</span></a><span class="sd">        The atmospheric pressure in pascals.</span>
 </span><span id="L-230"><a href="#L-230"><span class="linenos">230</span></a>
-</span><span id="L-231"><a href="#L-231"><span class="linenos">231</span></a><span class="sd">    Parameters</span>
-</span><span id="L-232"><a href="#L-232"><span class="linenos">232</span></a><span class="sd">    ----------</span>
-</span><span id="L-233"><a href="#L-233"><span class="linenos">233</span></a><span class="sd">    temperature : float</span>
-</span><span id="L-234"><a href="#L-234"><span class="linenos">234</span></a><span class="sd">        The temperature in degrees Celsius.</span>
-</span><span id="L-235"><a href="#L-235"><span class="linenos">235</span></a><span class="sd">    freqs : np.ndarray</span>
-</span><span id="L-236"><a href="#L-236"><span class="linenos">236</span></a><span class="sd">        The array of frequencies.</span>
-</span><span id="L-237"><a href="#L-237"><span class="linenos">237</span></a><span class="sd">    s : float</span>
-</span><span id="L-238"><a href="#L-238"><span class="linenos">238</span></a><span class="sd">        The distance between the microphones.</span>
-</span><span id="L-239"><a href="#L-239"><span class="linenos">239</span></a>
-</span><span id="L-240"><a href="#L-240"><span class="linenos">240</span></a><span class="sd">    Returns</span>
-</span><span id="L-241"><a href="#L-241"><span class="linenos">241</span></a><span class="sd">    -------</span>
-</span><span id="L-242"><a href="#L-242"><span class="linenos">242</span></a><span class="sd">    tuple[np.ndarray, np.ndarray]</span>
-</span><span id="L-243"><a href="#L-243"><span class="linenos">243</span></a><span class="sd">        A tuple containing the transfer functions for the incident and reflected sound.</span>
+</span><span id="L-231"><a href="#L-231"><span class="linenos">231</span></a><span class="sd">    Returns</span>
+</span><span id="L-232"><a href="#L-232"><span class="linenos">232</span></a><span class="sd">    -------</span>
+</span><span id="L-233"><a href="#L-233"><span class="linenos">233</span></a><span class="sd">    float</span>
+</span><span id="L-234"><a href="#L-234"><span class="linenos">234</span></a><span class="sd">        The characteristic impedance of air.</span>
+</span><span id="L-235"><a href="#L-235"><span class="linenos">235</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-236"><a href="#L-236"><span class="linenos">236</span></a>    <span class="n">char_impedance</span> <span class="o">=</span> <span class="n">NORMAL_DENSITY</span><span class="o">*</span><span class="p">(</span>
+</span><span id="L-237"><a href="#L-237"><span class="linenos">237</span></a>        <span class="p">(</span><span class="n">atm_pressure</span><span class="o">*</span><span class="n">NORMAL_TEMPERATURE</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">NORMAL_PRESSURE</span><span class="o">*</span><span class="p">(</span><span class="n">temperature</span><span class="o">+</span><span class="mi">273</span><span class="p">))</span>
+</span><span id="L-238"><a href="#L-238"><span class="linenos">238</span></a>    <span class="p">)</span>
+</span><span id="L-239"><a href="#L-239"><span class="linenos">239</span></a>    <span class="k">return</span> <span class="n">char_impedance</span>
+</span><span id="L-240"><a href="#L-240"><span class="linenos">240</span></a>
+</span><span id="L-241"><a href="#L-241"><span class="linenos">241</span></a><span class="k">def</span> <span class="nf">k_0</span><span class="p">(</span><span class="n">speed_sound</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">freqs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+</span><span id="L-242"><a href="#L-242"><span class="linenos">242</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-243"><a href="#L-243"><span class="linenos">243</span></a><span class="sd">    Calculate the wavenumber for a given speed of sound and frequencies.</span>
 </span><span id="L-244"><a href="#L-244"><span class="linenos">244</span></a>
-</span><span id="L-245"><a href="#L-245"><span class="linenos">245</span></a><span class="sd">    Notes</span>
-</span><span id="L-246"><a href="#L-246"><span class="linenos">246</span></a><span class="sd">    -----</span>
-</span><span id="L-247"><a href="#L-247"><span class="linenos">247</span></a><span class="sd">    The transfer functions are calculated using the speed of sound at the given temperature and the array of frequencies.</span>
-</span><span id="L-248"><a href="#L-248"><span class="linenos">248</span></a><span class="sd">    The transfer function for the incident sound is calculated as exp(-1j * k_0 * s), where k_0 is the wavenumber.</span>
-</span><span id="L-249"><a href="#L-249"><span class="linenos">249</span></a><span class="sd">    The transfer function for the reflected sound is calculated as exp(1j * k_0 * s), where k_0 is the wavenumber.</span>
-</span><span id="L-250"><a href="#L-250"><span class="linenos">250</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-251"><a href="#L-251"><span class="linenos">251</span></a>    <span class="n">tf_I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">k_0</span><span class="p">(</span><span class="n">calc_speed_sound</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span> <span class="n">freqs</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span><span class="p">)</span>
-</span><span id="L-252"><a href="#L-252"><span class="linenos">252</span></a>    <span class="n">tf_R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">k_0</span><span class="p">(</span><span class="n">calc_speed_sound</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span> <span class="n">freqs</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span><span class="p">)</span>
-</span><span id="L-253"><a href="#L-253"><span class="linenos">253</span></a>    <span class="k">return</span> <span class="n">tf_I</span><span class="p">,</span> <span class="n">tf_R</span>
-</span><span id="L-254"><a href="#L-254"><span class="linenos">254</span></a>
-</span><span id="L-255"><a href="#L-255"><span class="linenos">255</span></a><span class="k">def</span> <span class="nf">reflection_factor</span><span class="p">(</span>
-</span><span id="L-256"><a href="#L-256"><span class="linenos">256</span></a>        <span class="n">tf_I</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
-</span><span id="L-257"><a href="#L-257"><span class="linenos">257</span></a>        <span class="n">tf_R</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
-</span><span id="L-258"><a href="#L-258"><span class="linenos">258</span></a>        <span class="n">tf_12</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
-</span><span id="L-259"><a href="#L-259"><span class="linenos">259</span></a>        <span class="n">temperature</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
-</span><span id="L-260"><a href="#L-260"><span class="linenos">260</span></a>        <span class="n">freqs</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
-</span><span id="L-261"><a href="#L-261"><span class="linenos">261</span></a>        <span class="n">x1</span> <span class="p">:</span> <span class="nb">float</span>
-</span><span id="L-262"><a href="#L-262"><span class="linenos">262</span></a>        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span id="L-263"><a href="#L-263"><span class="linenos">263</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the reflection factor for a given set of parameters.</span>
-</span><span id="L-264"><a href="#L-264"><span class="linenos">264</span></a>
-</span><span id="L-265"><a href="#L-265"><span class="linenos">265</span></a><span class="sd">    Parameters</span>
-</span><span id="L-266"><a href="#L-266"><span class="linenos">266</span></a><span class="sd">    ----------</span>
-</span><span id="L-267"><a href="#L-267"><span class="linenos">267</span></a><span class="sd">    tf_I : np.ndarray</span>
-</span><span id="L-268"><a href="#L-268"><span class="linenos">268</span></a><span class="sd">        The transfer function of the incident wave.</span>
-</span><span id="L-269"><a href="#L-269"><span class="linenos">269</span></a><span class="sd">    tf_R : np.ndarray</span>
-</span><span id="L-270"><a href="#L-270"><span class="linenos">270</span></a><span class="sd">        The transfer function of the reflected wave.</span>
-</span><span id="L-271"><a href="#L-271"><span class="linenos">271</span></a><span class="sd">    tf_12 : np.ndarray</span>
-</span><span id="L-272"><a href="#L-272"><span class="linenos">272</span></a><span class="sd">        The transfer function of the medium between the incident and reflected waves.</span>
-</span><span id="L-273"><a href="#L-273"><span class="linenos">273</span></a><span class="sd">    temperature : float</span>
-</span><span id="L-274"><a href="#L-274"><span class="linenos">274</span></a><span class="sd">        The temperature of the medium.</span>
-</span><span id="L-275"><a href="#L-275"><span class="linenos">275</span></a><span class="sd">    freqs : np.ndarray</span>
-</span><span id="L-276"><a href="#L-276"><span class="linenos">276</span></a><span class="sd">        The frequencies at which the reflection factor is calculated.</span>
-</span><span id="L-277"><a href="#L-277"><span class="linenos">277</span></a><span class="sd">    x1 : float</span>
-</span><span id="L-278"><a href="#L-278"><span class="linenos">278</span></a><span class="sd">        The distance between the incident and reflected waves.</span>
-</span><span id="L-279"><a href="#L-279"><span class="linenos">279</span></a>
-</span><span id="L-280"><a href="#L-280"><span class="linenos">280</span></a><span class="sd">    Returns</span>
-</span><span id="L-281"><a href="#L-281"><span class="linenos">281</span></a><span class="sd">    -------</span>
-</span><span id="L-282"><a href="#L-282"><span class="linenos">282</span></a><span class="sd">    np.ndarray</span>
-</span><span id="L-283"><a href="#L-283"><span class="linenos">283</span></a><span class="sd">        The reflection factor at each frequency.</span>
-</span><span id="L-284"><a href="#L-284"><span class="linenos">284</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-285"><a href="#L-285"><span class="linenos">285</span></a>    <span class="k">return</span> <span class="p">(</span><span class="n">tf_12</span> <span class="o">-</span> <span class="n">tf_I</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">tf_R</span> <span class="o">-</span> <span class="n">tf_12</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">k_0</span><span class="p">(</span><span class="n">calc_speed_sound</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span> <span class="n">freqs</span><span class="p">)</span> <span class="o">*</span> <span class="n">x1</span><span class="p">)</span>
-</span><span id="L-286"><a href="#L-286"><span class="linenos">286</span></a>
-</span><span id="L-287"><a href="#L-287"><span class="linenos">287</span></a><span class="k">def</span> <span class="nf">absorption_coefficient</span><span class="p">(</span><span class="n">reflection_f</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span id="L-288"><a href="#L-288"><span class="linenos">288</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-289"><a href="#L-289"><span class="linenos">289</span></a><span class="sd">    Calculate the absorption coefficient.</span>
+</span><span id="L-245"><a href="#L-245"><span class="linenos">245</span></a><span class="sd">    Parameters</span>
+</span><span id="L-246"><a href="#L-246"><span class="linenos">246</span></a><span class="sd">    ----------</span>
+</span><span id="L-247"><a href="#L-247"><span class="linenos">247</span></a><span class="sd">    speed_sound : float</span>
+</span><span id="L-248"><a href="#L-248"><span class="linenos">248</span></a><span class="sd">        The speed of sound.</span>
+</span><span id="L-249"><a href="#L-249"><span class="linenos">249</span></a><span class="sd">    freqs : np.ndarray</span>
+</span><span id="L-250"><a href="#L-250"><span class="linenos">250</span></a><span class="sd">        An array of frequencies.</span>
+</span><span id="L-251"><a href="#L-251"><span class="linenos">251</span></a>
+</span><span id="L-252"><a href="#L-252"><span class="linenos">252</span></a><span class="sd">    Returns</span>
+</span><span id="L-253"><a href="#L-253"><span class="linenos">253</span></a><span class="sd">    -------</span>
+</span><span id="L-254"><a href="#L-254"><span class="linenos">254</span></a><span class="sd">    np.ndarray</span>
+</span><span id="L-255"><a href="#L-255"><span class="linenos">255</span></a><span class="sd">        An array of wavenumbers.</span>
+</span><span id="L-256"><a href="#L-256"><span class="linenos">256</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-257"><a href="#L-257"><span class="linenos">257</span></a>    <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">freqs</span> <span class="o">/</span> <span class="n">speed_sound</span>
+</span><span id="L-258"><a href="#L-258"><span class="linenos">258</span></a>
+</span><span id="L-259"><a href="#L-259"><span class="linenos">259</span></a><span class="k">def</span> <span class="nf">tf_i_r</span><span class="p">(</span>
+</span><span id="L-260"><a href="#L-260"><span class="linenos">260</span></a>        <span class="n">temperature</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
+</span><span id="L-261"><a href="#L-261"><span class="linenos">261</span></a>        <span class="n">freqs</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+</span><span id="L-262"><a href="#L-262"><span class="linenos">262</span></a>        <span class="n">s</span> <span class="p">:</span> <span class="nb">float</span>
+</span><span id="L-263"><a href="#L-263"><span class="linenos">263</span></a>        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+</span><span id="L-264"><a href="#L-264"><span class="linenos">264</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-265"><a href="#L-265"><span class="linenos">265</span></a><span class="sd">    Calculate the transfer functions for the incident and reflected sound.</span>
+</span><span id="L-266"><a href="#L-266"><span class="linenos">266</span></a>
+</span><span id="L-267"><a href="#L-267"><span class="linenos">267</span></a><span class="sd">    Parameters</span>
+</span><span id="L-268"><a href="#L-268"><span class="linenos">268</span></a><span class="sd">    ----------</span>
+</span><span id="L-269"><a href="#L-269"><span class="linenos">269</span></a><span class="sd">    temperature : float</span>
+</span><span id="L-270"><a href="#L-270"><span class="linenos">270</span></a><span class="sd">        The temperature in degrees Celsius.</span>
+</span><span id="L-271"><a href="#L-271"><span class="linenos">271</span></a><span class="sd">    freqs : np.ndarray</span>
+</span><span id="L-272"><a href="#L-272"><span class="linenos">272</span></a><span class="sd">        The array of frequencies.</span>
+</span><span id="L-273"><a href="#L-273"><span class="linenos">273</span></a><span class="sd">    s : float</span>
+</span><span id="L-274"><a href="#L-274"><span class="linenos">274</span></a><span class="sd">        The distance between the microphones.</span>
+</span><span id="L-275"><a href="#L-275"><span class="linenos">275</span></a>
+</span><span id="L-276"><a href="#L-276"><span class="linenos">276</span></a><span class="sd">    Returns</span>
+</span><span id="L-277"><a href="#L-277"><span class="linenos">277</span></a><span class="sd">    -------</span>
+</span><span id="L-278"><a href="#L-278"><span class="linenos">278</span></a><span class="sd">    tuple[np.ndarray, np.ndarray]</span>
+</span><span id="L-279"><a href="#L-279"><span class="linenos">279</span></a><span class="sd">        A tuple containing the transfer functions for the incident and reflected sound.</span>
+</span><span id="L-280"><a href="#L-280"><span class="linenos">280</span></a>
+</span><span id="L-281"><a href="#L-281"><span class="linenos">281</span></a><span class="sd">    Notes</span>
+</span><span id="L-282"><a href="#L-282"><span class="linenos">282</span></a><span class="sd">    -----</span>
+</span><span id="L-283"><a href="#L-283"><span class="linenos">283</span></a><span class="sd">    The transfer functions are calculated using the speed of sound at the given temperature and the array of frequencies.</span>
+</span><span id="L-284"><a href="#L-284"><span class="linenos">284</span></a><span class="sd">    The transfer function for the incident sound is calculated as exp(-1j * k_0 * s), where k_0 is the wavenumber.</span>
+</span><span id="L-285"><a href="#L-285"><span class="linenos">285</span></a><span class="sd">    The transfer function for the reflected sound is calculated as exp(1j * k_0 * s), where k_0 is the wavenumber.</span>
+</span><span id="L-286"><a href="#L-286"><span class="linenos">286</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-287"><a href="#L-287"><span class="linenos">287</span></a>    <span class="n">tf_I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">k_0</span><span class="p">(</span><span class="n">calc_speed_sound</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span> <span class="n">freqs</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span><span class="p">)</span>
+</span><span id="L-288"><a href="#L-288"><span class="linenos">288</span></a>    <span class="n">tf_R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">k_0</span><span class="p">(</span><span class="n">calc_speed_sound</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span> <span class="n">freqs</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span><span class="p">)</span>
+</span><span id="L-289"><a href="#L-289"><span class="linenos">289</span></a>    <span class="k">return</span> <span class="n">tf_I</span><span class="p">,</span> <span class="n">tf_R</span>
 </span><span id="L-290"><a href="#L-290"><span class="linenos">290</span></a>
-</span><span id="L-291"><a href="#L-291"><span class="linenos">291</span></a><span class="sd">    Parameters</span>
-</span><span id="L-292"><a href="#L-292"><span class="linenos">292</span></a><span class="sd">    ----------</span>
-</span><span id="L-293"><a href="#L-293"><span class="linenos">293</span></a><span class="sd">    reflection_f : np.ndarray</span>
-</span><span id="L-294"><a href="#L-294"><span class="linenos">294</span></a><span class="sd">        The reflection coefficient in the frequency domain.</span>
-</span><span id="L-295"><a href="#L-295"><span class="linenos">295</span></a>
-</span><span id="L-296"><a href="#L-296"><span class="linenos">296</span></a><span class="sd">    Returns</span>
-</span><span id="L-297"><a href="#L-297"><span class="linenos">297</span></a><span class="sd">    -------</span>
-</span><span id="L-298"><a href="#L-298"><span class="linenos">298</span></a><span class="sd">    np.ndarray</span>
-</span><span id="L-299"><a href="#L-299"><span class="linenos">299</span></a><span class="sd">        The absorption coefficient in the frequency domain.</span>
-</span><span id="L-300"><a href="#L-300"><span class="linenos">300</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-301"><a href="#L-301"><span class="linenos">301</span></a>    <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">reflection_f</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
-</span><span id="L-302"><a href="#L-302"><span class="linenos">302</span></a>
-</span><span id="L-303"><a href="#L-303"><span class="linenos">303</span></a><span class="k">def</span> <span class="nf">surface_impedance</span><span class="p">(</span>
-</span><span id="L-304"><a href="#L-304"><span class="linenos">304</span></a>        <span class="n">reflection_f</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
-</span><span id="L-305"><a href="#L-305"><span class="linenos">305</span></a>        <span class="n">temperature</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
-</span><span id="L-306"><a href="#L-306"><span class="linenos">306</span></a>        <span class="n">atm_pressure</span> <span class="p">:</span> <span class="nb">float</span>
-</span><span id="L-307"><a href="#L-307"><span class="linenos">307</span></a>        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span id="L-308"><a href="#L-308"><span class="linenos">308</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the surface impedance.</span>
-</span><span id="L-309"><a href="#L-309"><span class="linenos">309</span></a>
-</span><span id="L-310"><a href="#L-310"><span class="linenos">310</span></a><span class="sd">    This function calculates the surface impedance based on the reflection factor, temperature, and atmospheric pressure.</span>
-</span><span id="L-311"><a href="#L-311"><span class="linenos">311</span></a>
-</span><span id="L-312"><a href="#L-312"><span class="linenos">312</span></a><span class="sd">    Parameters</span>
-</span><span id="L-313"><a href="#L-313"><span class="linenos">313</span></a><span class="sd">    ----------</span>
-</span><span id="L-314"><a href="#L-314"><span class="linenos">314</span></a><span class="sd">    reflection_f : np.ndarray</span>
-</span><span id="L-315"><a href="#L-315"><span class="linenos">315</span></a><span class="sd">        The reflection factor.</span>
-</span><span id="L-316"><a href="#L-316"><span class="linenos">316</span></a><span class="sd">    temperature : float</span>
-</span><span id="L-317"><a href="#L-317"><span class="linenos">317</span></a><span class="sd">        The temperature in degrees Celsius.</span>
-</span><span id="L-318"><a href="#L-318"><span class="linenos">318</span></a><span class="sd">    atm_pressure : float</span>
-</span><span id="L-319"><a href="#L-319"><span class="linenos">319</span></a><span class="sd">        The atmospheric pressure in Pascal.</span>
-</span><span id="L-320"><a href="#L-320"><span class="linenos">320</span></a>
-</span><span id="L-321"><a href="#L-321"><span class="linenos">321</span></a><span class="sd">    Returns</span>
-</span><span id="L-322"><a href="#L-322"><span class="linenos">322</span></a><span class="sd">    -------</span>
-</span><span id="L-323"><a href="#L-323"><span class="linenos">323</span></a><span class="sd">    float</span>
-</span><span id="L-324"><a href="#L-324"><span class="linenos">324</span></a><span class="sd">        The surface impedance.</span>
-</span><span id="L-325"><a href="#L-325"><span class="linenos">325</span></a>
-</span><span id="L-326"><a href="#L-326"><span class="linenos">326</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-327"><a href="#L-327"><span class="linenos">327</span></a>    <span class="n">char_impedance_air</span> <span class="o">=</span> <span class="n">calc_char_impedance_air</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="n">atm_pressure</span><span class="p">)</span>
-</span><span id="L-328"><a href="#L-328"><span class="linenos">328</span></a>    <span class="n">surf_impedance</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">reflection_f</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">reflection_f</span><span class="p">)</span><span class="o">*</span><span class="n">char_impedance_air</span>
-</span><span id="L-329"><a href="#L-329"><span class="linenos">329</span></a>    <span class="k">return</span> <span class="n">surf_impedance</span>
+</span><span id="L-291"><a href="#L-291"><span class="linenos">291</span></a><span class="k">def</span> <span class="nf">reflection_factor</span><span class="p">(</span>
+</span><span id="L-292"><a href="#L-292"><span class="linenos">292</span></a>        <span class="n">tf_I</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+</span><span id="L-293"><a href="#L-293"><span class="linenos">293</span></a>        <span class="n">tf_R</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+</span><span id="L-294"><a href="#L-294"><span class="linenos">294</span></a>        <span class="n">tf_12</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+</span><span id="L-295"><a href="#L-295"><span class="linenos">295</span></a>        <span class="n">temperature</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
+</span><span id="L-296"><a href="#L-296"><span class="linenos">296</span></a>        <span class="n">freqs</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+</span><span id="L-297"><a href="#L-297"><span class="linenos">297</span></a>        <span class="n">x1</span> <span class="p">:</span> <span class="nb">float</span>
+</span><span id="L-298"><a href="#L-298"><span class="linenos">298</span></a>        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+</span><span id="L-299"><a href="#L-299"><span class="linenos">299</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the reflection factor for a given set of parameters.</span>
+</span><span id="L-300"><a href="#L-300"><span class="linenos">300</span></a>
+</span><span id="L-301"><a href="#L-301"><span class="linenos">301</span></a><span class="sd">    Parameters</span>
+</span><span id="L-302"><a href="#L-302"><span class="linenos">302</span></a><span class="sd">    ----------</span>
+</span><span id="L-303"><a href="#L-303"><span class="linenos">303</span></a><span class="sd">    tf_I : np.ndarray</span>
+</span><span id="L-304"><a href="#L-304"><span class="linenos">304</span></a><span class="sd">        The transfer function of the incident wave.</span>
+</span><span id="L-305"><a href="#L-305"><span class="linenos">305</span></a><span class="sd">    tf_R : np.ndarray</span>
+</span><span id="L-306"><a href="#L-306"><span class="linenos">306</span></a><span class="sd">        The transfer function of the reflected wave.</span>
+</span><span id="L-307"><a href="#L-307"><span class="linenos">307</span></a><span class="sd">    tf_12 : np.ndarray</span>
+</span><span id="L-308"><a href="#L-308"><span class="linenos">308</span></a><span class="sd">        The transfer function of the medium between the incident and reflected waves.</span>
+</span><span id="L-309"><a href="#L-309"><span class="linenos">309</span></a><span class="sd">    temperature : float</span>
+</span><span id="L-310"><a href="#L-310"><span class="linenos">310</span></a><span class="sd">        The temperature of the medium.</span>
+</span><span id="L-311"><a href="#L-311"><span class="linenos">311</span></a><span class="sd">    freqs : np.ndarray</span>
+</span><span id="L-312"><a href="#L-312"><span class="linenos">312</span></a><span class="sd">        The frequencies at which the reflection factor is calculated.</span>
+</span><span id="L-313"><a href="#L-313"><span class="linenos">313</span></a><span class="sd">    x1 : float</span>
+</span><span id="L-314"><a href="#L-314"><span class="linenos">314</span></a><span class="sd">        The distance between the sample and the first microphone position.</span>
+</span><span id="L-315"><a href="#L-315"><span class="linenos">315</span></a>
+</span><span id="L-316"><a href="#L-316"><span class="linenos">316</span></a><span class="sd">    Returns</span>
+</span><span id="L-317"><a href="#L-317"><span class="linenos">317</span></a><span class="sd">    -------</span>
+</span><span id="L-318"><a href="#L-318"><span class="linenos">318</span></a><span class="sd">    np.ndarray</span>
+</span><span id="L-319"><a href="#L-319"><span class="linenos">319</span></a><span class="sd">        The reflection factor at each frequency.</span>
+</span><span id="L-320"><a href="#L-320"><span class="linenos">320</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-321"><a href="#L-321"><span class="linenos">321</span></a>    <span class="k">return</span> <span class="p">(</span><span class="n">tf_12</span> <span class="o">-</span> <span class="n">tf_I</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">tf_R</span> <span class="o">-</span> <span class="n">tf_12</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">k_0</span><span class="p">(</span><span class="n">calc_speed_sound</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span> <span class="n">freqs</span><span class="p">)</span> <span class="o">*</span> <span class="n">x1</span><span class="p">)</span>
+</span><span id="L-322"><a href="#L-322"><span class="linenos">322</span></a>
+</span><span id="L-323"><a href="#L-323"><span class="linenos">323</span></a><span class="k">def</span> <span class="nf">absorption_coefficient</span><span class="p">(</span><span class="n">reflection_f</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+</span><span id="L-324"><a href="#L-324"><span class="linenos">324</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-325"><a href="#L-325"><span class="linenos">325</span></a><span class="sd">    Calculate the absorption coefficient.</span>
+</span><span id="L-326"><a href="#L-326"><span class="linenos">326</span></a>
+</span><span id="L-327"><a href="#L-327"><span class="linenos">327</span></a><span class="sd">    Parameters</span>
+</span><span id="L-328"><a href="#L-328"><span class="linenos">328</span></a><span class="sd">    ----------</span>
+</span><span id="L-329"><a href="#L-329"><span class="linenos">329</span></a><span class="sd">    reflection_f : np.ndarray</span>
+</span><span id="L-330"><a href="#L-330"><span class="linenos">330</span></a><span class="sd">        The reflection coefficient in the frequency domain.</span>
+</span><span id="L-331"><a href="#L-331"><span class="linenos">331</span></a>
+</span><span id="L-332"><a href="#L-332"><span class="linenos">332</span></a><span class="sd">    Returns</span>
+</span><span id="L-333"><a href="#L-333"><span class="linenos">333</span></a><span class="sd">    -------</span>
+</span><span id="L-334"><a href="#L-334"><span class="linenos">334</span></a><span class="sd">    np.ndarray</span>
+</span><span id="L-335"><a href="#L-335"><span class="linenos">335</span></a><span class="sd">        The absorption coefficient in the frequency domain.</span>
+</span><span id="L-336"><a href="#L-336"><span class="linenos">336</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-337"><a href="#L-337"><span class="linenos">337</span></a>    <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">reflection_f</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+</span><span id="L-338"><a href="#L-338"><span class="linenos">338</span></a>
+</span><span id="L-339"><a href="#L-339"><span class="linenos">339</span></a><span class="k">def</span> <span class="nf">surface_impedance</span><span class="p">(</span>
+</span><span id="L-340"><a href="#L-340"><span class="linenos">340</span></a>        <span class="n">reflection_f</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+</span><span id="L-341"><a href="#L-341"><span class="linenos">341</span></a>        <span class="n">temperature</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
+</span><span id="L-342"><a href="#L-342"><span class="linenos">342</span></a>        <span class="n">atm_pressure</span> <span class="p">:</span> <span class="nb">float</span>
+</span><span id="L-343"><a href="#L-343"><span class="linenos">343</span></a>        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span id="L-344"><a href="#L-344"><span class="linenos">344</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the surface impedance.</span>
+</span><span id="L-345"><a href="#L-345"><span class="linenos">345</span></a>
+</span><span id="L-346"><a href="#L-346"><span class="linenos">346</span></a><span class="sd">    This function calculates the surface impedance based on the reflection factor, temperature, and atmospheric pressure.</span>
+</span><span id="L-347"><a href="#L-347"><span class="linenos">347</span></a>
+</span><span id="L-348"><a href="#L-348"><span class="linenos">348</span></a><span class="sd">    Parameters</span>
+</span><span id="L-349"><a href="#L-349"><span class="linenos">349</span></a><span class="sd">    ----------</span>
+</span><span id="L-350"><a href="#L-350"><span class="linenos">350</span></a><span class="sd">    reflection_f : np.ndarray</span>
+</span><span id="L-351"><a href="#L-351"><span class="linenos">351</span></a><span class="sd">        The reflection factor.</span>
+</span><span id="L-352"><a href="#L-352"><span class="linenos">352</span></a><span class="sd">    temperature : float</span>
+</span><span id="L-353"><a href="#L-353"><span class="linenos">353</span></a><span class="sd">        The temperature in degrees Celsius.</span>
+</span><span id="L-354"><a href="#L-354"><span class="linenos">354</span></a><span class="sd">    atm_pressure : float</span>
+</span><span id="L-355"><a href="#L-355"><span class="linenos">355</span></a><span class="sd">        The atmospheric pressure in Pascal.</span>
+</span><span id="L-356"><a href="#L-356"><span class="linenos">356</span></a>
+</span><span id="L-357"><a href="#L-357"><span class="linenos">357</span></a><span class="sd">    Returns</span>
+</span><span id="L-358"><a href="#L-358"><span class="linenos">358</span></a><span class="sd">    -------</span>
+</span><span id="L-359"><a href="#L-359"><span class="linenos">359</span></a><span class="sd">    float</span>
+</span><span id="L-360"><a href="#L-360"><span class="linenos">360</span></a><span class="sd">        The surface impedance.</span>
+</span><span id="L-361"><a href="#L-361"><span class="linenos">361</span></a>
+</span><span id="L-362"><a href="#L-362"><span class="linenos">362</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-363"><a href="#L-363"><span class="linenos">363</span></a>    <span class="n">char_impedance_air</span> <span class="o">=</span> <span class="n">calc_char_impedance_air</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="n">atm_pressure</span><span class="p">)</span>
+</span><span id="L-364"><a href="#L-364"><span class="linenos">364</span></a>    <span class="n">surf_impedance</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">reflection_f</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">reflection_f</span><span class="p">)</span><span class="o">*</span><span class="n">char_impedance_air</span>
+</span><span id="L-365"><a href="#L-365"><span class="linenos">365</span></a>    <span class="k">return</span> <span class="n">surf_impedance</span>
 </span></pre></div>
 
 
@@ -848,6 +890,106 @@ The input array representing p22.</li>
 
 
                 </section>
+                <section id="calc_rms_fs">
+                            <input id="calc_rms_fs-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">calc_rms_fs</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">p1</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span></span><span class="return-annotation">) -> <span class="nb">float</span>:</span></span>
+
+                <label class="view-source-button" for="calc_rms_fs-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#calc_rms_fs"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="calc_rms_fs-168"><a href="#calc_rms_fs-168"><span class="linenos">168</span></a><span class="k">def</span> <span class="nf">calc_rms_fs</span><span class="p">(</span><span class="n">p1</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span id="calc_rms_fs-169"><a href="#calc_rms_fs-169"><span class="linenos">169</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the root mean square (RMS) value of a signal.</span>
+</span><span id="calc_rms_fs-170"><a href="#calc_rms_fs-170"><span class="linenos">170</span></a>
+</span><span id="calc_rms_fs-171"><a href="#calc_rms_fs-171"><span class="linenos">171</span></a><span class="sd">    Parameters</span>
+</span><span id="calc_rms_fs-172"><a href="#calc_rms_fs-172"><span class="linenos">172</span></a><span class="sd">    ----------</span>
+</span><span id="calc_rms_fs-173"><a href="#calc_rms_fs-173"><span class="linenos">173</span></a><span class="sd">    p1 : np.ndarray</span>
+</span><span id="calc_rms_fs-174"><a href="#calc_rms_fs-174"><span class="linenos">174</span></a><span class="sd">        The input signal.</span>
+</span><span id="calc_rms_fs-175"><a href="#calc_rms_fs-175"><span class="linenos">175</span></a>
+</span><span id="calc_rms_fs-176"><a href="#calc_rms_fs-176"><span class="linenos">176</span></a><span class="sd">    Returns</span>
+</span><span id="calc_rms_fs-177"><a href="#calc_rms_fs-177"><span class="linenos">177</span></a><span class="sd">    -------</span>
+</span><span id="calc_rms_fs-178"><a href="#calc_rms_fs-178"><span class="linenos">178</span></a><span class="sd">    float</span>
+</span><span id="calc_rms_fs-179"><a href="#calc_rms_fs-179"><span class="linenos">179</span></a><span class="sd">        The RMS value of the input signal.</span>
+</span><span id="calc_rms_fs-180"><a href="#calc_rms_fs-180"><span class="linenos">180</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="calc_rms_fs-181"><a href="#calc_rms_fs-181"><span class="linenos">181</span></a>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">p1</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>Calculate the root mean square (RMS) value of a signal.</p>
+
+<h6 id="parameters">Parameters</h6>
+
+<ul>
+<li><strong>p1</strong> (np.ndarray):
+The input signal.</li>
+</ul>
+
+<h6 id="returns">Returns</h6>
+
+<ul>
+<li><strong>float</strong>: The RMS value of the input signal.</li>
+</ul>
+</div>
+
+
+                </section>
+                <section id="calc_rms_pressure_level">
+                            <input id="calc_rms_pressure_level-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">calc_rms_pressure_level</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">p1</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span>, </span><span class="param"><span class="n">fs_to_spl</span><span class="p">:</span> <span class="nb">float</span></span><span class="return-annotation">) -> <span class="nb">float</span>:</span></span>
+
+                <label class="view-source-button" for="calc_rms_pressure_level-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#calc_rms_pressure_level"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="calc_rms_pressure_level-183"><a href="#calc_rms_pressure_level-183"><span class="linenos">183</span></a><span class="k">def</span> <span class="nf">calc_rms_pressure_level</span><span class="p">(</span>
+</span><span id="calc_rms_pressure_level-184"><a href="#calc_rms_pressure_level-184"><span class="linenos">184</span></a>        <span class="n">p1</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+</span><span id="calc_rms_pressure_level-185"><a href="#calc_rms_pressure_level-185"><span class="linenos">185</span></a>        <span class="n">fs_to_spl</span> <span class="p">:</span> <span class="nb">float</span>
+</span><span id="calc_rms_pressure_level-186"><a href="#calc_rms_pressure_level-186"><span class="linenos">186</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span id="calc_rms_pressure_level-187"><a href="#calc_rms_pressure_level-187"><span class="linenos">187</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the RMS pressure level of a signal.</span>
+</span><span id="calc_rms_pressure_level-188"><a href="#calc_rms_pressure_level-188"><span class="linenos">188</span></a>
+</span><span id="calc_rms_pressure_level-189"><a href="#calc_rms_pressure_level-189"><span class="linenos">189</span></a><span class="sd">    Parameters</span>
+</span><span id="calc_rms_pressure_level-190"><a href="#calc_rms_pressure_level-190"><span class="linenos">190</span></a><span class="sd">    ----------</span>
+</span><span id="calc_rms_pressure_level-191"><a href="#calc_rms_pressure_level-191"><span class="linenos">191</span></a><span class="sd">    p1 : np.ndarray</span>
+</span><span id="calc_rms_pressure_level-192"><a href="#calc_rms_pressure_level-192"><span class="linenos">192</span></a><span class="sd">        The input signal.</span>
+</span><span id="calc_rms_pressure_level-193"><a href="#calc_rms_pressure_level-193"><span class="linenos">193</span></a><span class="sd">    fs_to_spl : float</span>
+</span><span id="calc_rms_pressure_level-194"><a href="#calc_rms_pressure_level-194"><span class="linenos">194</span></a><span class="sd">        The conversion factor (in dB) from full scale to sound pressure level.</span>
+</span><span id="calc_rms_pressure_level-195"><a href="#calc_rms_pressure_level-195"><span class="linenos">195</span></a>
+</span><span id="calc_rms_pressure_level-196"><a href="#calc_rms_pressure_level-196"><span class="linenos">196</span></a><span class="sd">    Returns</span>
+</span><span id="calc_rms_pressure_level-197"><a href="#calc_rms_pressure_level-197"><span class="linenos">197</span></a><span class="sd">    -------</span>
+</span><span id="calc_rms_pressure_level-198"><a href="#calc_rms_pressure_level-198"><span class="linenos">198</span></a><span class="sd">    float</span>
+</span><span id="calc_rms_pressure_level-199"><a href="#calc_rms_pressure_level-199"><span class="linenos">199</span></a><span class="sd">        The RMS pressure level of the input signal.</span>
+</span><span id="calc_rms_pressure_level-200"><a href="#calc_rms_pressure_level-200"><span class="linenos">200</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="calc_rms_pressure_level-201"><a href="#calc_rms_pressure_level-201"><span class="linenos">201</span></a>    <span class="n">fs_to_spl_factor</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">fs_to_spl</span><span class="o">/</span><span class="mi">20</span><span class="p">)</span>
+</span><span id="calc_rms_pressure_level-202"><a href="#calc_rms_pressure_level-202"><span class="linenos">202</span></a>    <span class="k">return</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">calc_rms_fs</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span> <span class="o">*</span> <span class="n">fs_to_spl_factor</span><span class="p">)</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>Calculate the RMS pressure level of a signal.</p>
+
+<h6 id="parameters">Parameters</h6>
+
+<ul>
+<li><strong>p1</strong> (np.ndarray):
+The input signal.</li>
+<li><strong>fs_to_spl</strong> (float):
+The conversion factor (in dB) from full scale to sound pressure level.</li>
+</ul>
+
+<h6 id="returns">Returns</h6>
+
+<ul>
+<li><strong>float</strong>: The RMS pressure level of the input signal.</li>
+</ul>
+</div>
+
+
+                </section>
                 <section id="calc_speed_sound">
                             <input id="calc_speed_sound-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
@@ -859,20 +1001,20 @@ The input array representing p22.</li>
 
     </div>
     <a class="headerlink" href="#calc_speed_sound"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="calc_speed_sound-168"><a href="#calc_speed_sound-168"><span class="linenos">168</span></a><span class="k">def</span> <span class="nf">calc_speed_sound</span><span class="p">(</span><span class="n">tempC</span> <span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span id="calc_speed_sound-169"><a href="#calc_speed_sound-169"><span class="linenos">169</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the speed of sound in air at a given temperature.</span>
-</span><span id="calc_speed_sound-170"><a href="#calc_speed_sound-170"><span class="linenos">170</span></a>
-</span><span id="calc_speed_sound-171"><a href="#calc_speed_sound-171"><span class="linenos">171</span></a><span class="sd">    Parameters</span>
-</span><span id="calc_speed_sound-172"><a href="#calc_speed_sound-172"><span class="linenos">172</span></a><span class="sd">    ----------</span>
-</span><span id="calc_speed_sound-173"><a href="#calc_speed_sound-173"><span class="linenos">173</span></a><span class="sd">    tempC : float</span>
-</span><span id="calc_speed_sound-174"><a href="#calc_speed_sound-174"><span class="linenos">174</span></a><span class="sd">        The temperature in degrees Celsius.</span>
-</span><span id="calc_speed_sound-175"><a href="#calc_speed_sound-175"><span class="linenos">175</span></a>
-</span><span id="calc_speed_sound-176"><a href="#calc_speed_sound-176"><span class="linenos">176</span></a><span class="sd">    Returns</span>
-</span><span id="calc_speed_sound-177"><a href="#calc_speed_sound-177"><span class="linenos">177</span></a><span class="sd">    -------</span>
-</span><span id="calc_speed_sound-178"><a href="#calc_speed_sound-178"><span class="linenos">178</span></a><span class="sd">    float</span>
-</span><span id="calc_speed_sound-179"><a href="#calc_speed_sound-179"><span class="linenos">179</span></a><span class="sd">        The speed of sound in meters per second.</span>
-</span><span id="calc_speed_sound-180"><a href="#calc_speed_sound-180"><span class="linenos">180</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="calc_speed_sound-181"><a href="#calc_speed_sound-181"><span class="linenos">181</span></a>    <span class="k">return</span> <span class="mf">343.2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">tempC</span><span class="o">+</span><span class="mi">273</span><span class="p">)</span> <span class="o">/</span> <span class="n">NORMAL_TEMPERATURE</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="calc_speed_sound-204"><a href="#calc_speed_sound-204"><span class="linenos">204</span></a><span class="k">def</span> <span class="nf">calc_speed_sound</span><span class="p">(</span><span class="n">tempC</span> <span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span id="calc_speed_sound-205"><a href="#calc_speed_sound-205"><span class="linenos">205</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the speed of sound in air at a given temperature.</span>
+</span><span id="calc_speed_sound-206"><a href="#calc_speed_sound-206"><span class="linenos">206</span></a>
+</span><span id="calc_speed_sound-207"><a href="#calc_speed_sound-207"><span class="linenos">207</span></a><span class="sd">    Parameters</span>
+</span><span id="calc_speed_sound-208"><a href="#calc_speed_sound-208"><span class="linenos">208</span></a><span class="sd">    ----------</span>
+</span><span id="calc_speed_sound-209"><a href="#calc_speed_sound-209"><span class="linenos">209</span></a><span class="sd">    tempC : float</span>
+</span><span id="calc_speed_sound-210"><a href="#calc_speed_sound-210"><span class="linenos">210</span></a><span class="sd">        The temperature in degrees Celsius.</span>
+</span><span id="calc_speed_sound-211"><a href="#calc_speed_sound-211"><span class="linenos">211</span></a>
+</span><span id="calc_speed_sound-212"><a href="#calc_speed_sound-212"><span class="linenos">212</span></a><span class="sd">    Returns</span>
+</span><span id="calc_speed_sound-213"><a href="#calc_speed_sound-213"><span class="linenos">213</span></a><span class="sd">    -------</span>
+</span><span id="calc_speed_sound-214"><a href="#calc_speed_sound-214"><span class="linenos">214</span></a><span class="sd">    float</span>
+</span><span id="calc_speed_sound-215"><a href="#calc_speed_sound-215"><span class="linenos">215</span></a><span class="sd">        The speed of sound in meters per second.</span>
+</span><span id="calc_speed_sound-216"><a href="#calc_speed_sound-216"><span class="linenos">216</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="calc_speed_sound-217"><a href="#calc_speed_sound-217"><span class="linenos">217</span></a>    <span class="k">return</span> <span class="mf">343.2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">tempC</span><span class="o">+</span><span class="mi">273</span><span class="p">)</span> <span class="o">/</span> <span class="n">NORMAL_TEMPERATURE</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -905,28 +1047,28 @@ The temperature in degrees Celsius.</li>
 
     </div>
     <a class="headerlink" href="#calc_char_impedance_air"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="calc_char_impedance_air-183"><a href="#calc_char_impedance_air-183"><span class="linenos">183</span></a><span class="k">def</span> <span class="nf">calc_char_impedance_air</span><span class="p">(</span><span class="n">temperature</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">atm_pressure</span> <span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span id="calc_char_impedance_air-184"><a href="#calc_char_impedance_air-184"><span class="linenos">184</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the characteristic impedance of air.</span>
-</span><span id="calc_char_impedance_air-185"><a href="#calc_char_impedance_air-185"><span class="linenos">185</span></a>
-</span><span id="calc_char_impedance_air-186"><a href="#calc_char_impedance_air-186"><span class="linenos">186</span></a><span class="sd">    This function calculates the characteristic impedance of air based on </span>
-</span><span id="calc_char_impedance_air-187"><a href="#calc_char_impedance_air-187"><span class="linenos">187</span></a><span class="sd">    the given temperature and atmospheric pressure.</span>
-</span><span id="calc_char_impedance_air-188"><a href="#calc_char_impedance_air-188"><span class="linenos">188</span></a>
-</span><span id="calc_char_impedance_air-189"><a href="#calc_char_impedance_air-189"><span class="linenos">189</span></a><span class="sd">    Parameters</span>
-</span><span id="calc_char_impedance_air-190"><a href="#calc_char_impedance_air-190"><span class="linenos">190</span></a><span class="sd">    ----------</span>
-</span><span id="calc_char_impedance_air-191"><a href="#calc_char_impedance_air-191"><span class="linenos">191</span></a><span class="sd">    temperature : float</span>
-</span><span id="calc_char_impedance_air-192"><a href="#calc_char_impedance_air-192"><span class="linenos">192</span></a><span class="sd">        The temperature of the air in degrees Celsius.</span>
-</span><span id="calc_char_impedance_air-193"><a href="#calc_char_impedance_air-193"><span class="linenos">193</span></a><span class="sd">    atm_pressure : float</span>
-</span><span id="calc_char_impedance_air-194"><a href="#calc_char_impedance_air-194"><span class="linenos">194</span></a><span class="sd">        The atmospheric pressure in pascals.</span>
-</span><span id="calc_char_impedance_air-195"><a href="#calc_char_impedance_air-195"><span class="linenos">195</span></a>
-</span><span id="calc_char_impedance_air-196"><a href="#calc_char_impedance_air-196"><span class="linenos">196</span></a><span class="sd">    Returns</span>
-</span><span id="calc_char_impedance_air-197"><a href="#calc_char_impedance_air-197"><span class="linenos">197</span></a><span class="sd">    -------</span>
-</span><span id="calc_char_impedance_air-198"><a href="#calc_char_impedance_air-198"><span class="linenos">198</span></a><span class="sd">    float</span>
-</span><span id="calc_char_impedance_air-199"><a href="#calc_char_impedance_air-199"><span class="linenos">199</span></a><span class="sd">        The characteristic impedance of air in ohms.</span>
-</span><span id="calc_char_impedance_air-200"><a href="#calc_char_impedance_air-200"><span class="linenos">200</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="calc_char_impedance_air-201"><a href="#calc_char_impedance_air-201"><span class="linenos">201</span></a>    <span class="n">char_impedance</span> <span class="o">=</span> <span class="n">NORMAL_DENSITY</span><span class="o">*</span><span class="p">(</span>
-</span><span id="calc_char_impedance_air-202"><a href="#calc_char_impedance_air-202"><span class="linenos">202</span></a>        <span class="p">(</span><span class="n">atm_pressure</span><span class="o">*</span><span class="n">NORMAL_TEMPERATURE</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">NORMAL_PRESSURE</span><span class="o">*</span><span class="p">(</span><span class="n">temperature</span><span class="o">+</span><span class="mi">273</span><span class="p">))</span>
-</span><span id="calc_char_impedance_air-203"><a href="#calc_char_impedance_air-203"><span class="linenos">203</span></a>    <span class="p">)</span>
-</span><span id="calc_char_impedance_air-204"><a href="#calc_char_impedance_air-204"><span class="linenos">204</span></a>    <span class="k">return</span> <span class="n">char_impedance</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="calc_char_impedance_air-219"><a href="#calc_char_impedance_air-219"><span class="linenos">219</span></a><span class="k">def</span> <span class="nf">calc_char_impedance_air</span><span class="p">(</span><span class="n">temperature</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">atm_pressure</span> <span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span id="calc_char_impedance_air-220"><a href="#calc_char_impedance_air-220"><span class="linenos">220</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the characteristic impedance of air.</span>
+</span><span id="calc_char_impedance_air-221"><a href="#calc_char_impedance_air-221"><span class="linenos">221</span></a>
+</span><span id="calc_char_impedance_air-222"><a href="#calc_char_impedance_air-222"><span class="linenos">222</span></a><span class="sd">    This function calculates the characteristic impedance of air based on </span>
+</span><span id="calc_char_impedance_air-223"><a href="#calc_char_impedance_air-223"><span class="linenos">223</span></a><span class="sd">    the given temperature and atmospheric pressure.</span>
+</span><span id="calc_char_impedance_air-224"><a href="#calc_char_impedance_air-224"><span class="linenos">224</span></a>
+</span><span id="calc_char_impedance_air-225"><a href="#calc_char_impedance_air-225"><span class="linenos">225</span></a><span class="sd">    Parameters</span>
+</span><span id="calc_char_impedance_air-226"><a href="#calc_char_impedance_air-226"><span class="linenos">226</span></a><span class="sd">    ----------</span>
+</span><span id="calc_char_impedance_air-227"><a href="#calc_char_impedance_air-227"><span class="linenos">227</span></a><span class="sd">    temperature : float</span>
+</span><span id="calc_char_impedance_air-228"><a href="#calc_char_impedance_air-228"><span class="linenos">228</span></a><span class="sd">        The temperature of the air in degrees Celsius.</span>
+</span><span id="calc_char_impedance_air-229"><a href="#calc_char_impedance_air-229"><span class="linenos">229</span></a><span class="sd">    atm_pressure : float</span>
+</span><span id="calc_char_impedance_air-230"><a href="#calc_char_impedance_air-230"><span class="linenos">230</span></a><span class="sd">        The atmospheric pressure in pascals.</span>
+</span><span id="calc_char_impedance_air-231"><a href="#calc_char_impedance_air-231"><span class="linenos">231</span></a>
+</span><span id="calc_char_impedance_air-232"><a href="#calc_char_impedance_air-232"><span class="linenos">232</span></a><span class="sd">    Returns</span>
+</span><span id="calc_char_impedance_air-233"><a href="#calc_char_impedance_air-233"><span class="linenos">233</span></a><span class="sd">    -------</span>
+</span><span id="calc_char_impedance_air-234"><a href="#calc_char_impedance_air-234"><span class="linenos">234</span></a><span class="sd">    float</span>
+</span><span id="calc_char_impedance_air-235"><a href="#calc_char_impedance_air-235"><span class="linenos">235</span></a><span class="sd">        The characteristic impedance of air.</span>
+</span><span id="calc_char_impedance_air-236"><a href="#calc_char_impedance_air-236"><span class="linenos">236</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="calc_char_impedance_air-237"><a href="#calc_char_impedance_air-237"><span class="linenos">237</span></a>    <span class="n">char_impedance</span> <span class="o">=</span> <span class="n">NORMAL_DENSITY</span><span class="o">*</span><span class="p">(</span>
+</span><span id="calc_char_impedance_air-238"><a href="#calc_char_impedance_air-238"><span class="linenos">238</span></a>        <span class="p">(</span><span class="n">atm_pressure</span><span class="o">*</span><span class="n">NORMAL_TEMPERATURE</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">NORMAL_PRESSURE</span><span class="o">*</span><span class="p">(</span><span class="n">temperature</span><span class="o">+</span><span class="mi">273</span><span class="p">))</span>
+</span><span id="calc_char_impedance_air-239"><a href="#calc_char_impedance_air-239"><span class="linenos">239</span></a>    <span class="p">)</span>
+</span><span id="calc_char_impedance_air-240"><a href="#calc_char_impedance_air-240"><span class="linenos">240</span></a>    <span class="k">return</span> <span class="n">char_impedance</span>
 </span></pre></div>
 
 
@@ -947,7 +1089,7 @@ The atmospheric pressure in pascals.</li>
 <h6 id="returns">Returns</h6>
 
 <ul>
-<li><strong>float</strong>: The characteristic impedance of air in ohms.</li>
+<li><strong>float</strong>: The characteristic impedance of air.</li>
 </ul>
 </div>
 
@@ -964,23 +1106,23 @@ The atmospheric pressure in pascals.</li>
 
     </div>
     <a class="headerlink" href="#k_0"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="k_0-206"><a href="#k_0-206"><span class="linenos">206</span></a><span class="k">def</span> <span class="nf">k_0</span><span class="p">(</span><span class="n">speed_sound</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">freqs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span id="k_0-207"><a href="#k_0-207"><span class="linenos">207</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="k_0-208"><a href="#k_0-208"><span class="linenos">208</span></a><span class="sd">    Calculate the wavenumber for a given speed of sound and frequencies.</span>
-</span><span id="k_0-209"><a href="#k_0-209"><span class="linenos">209</span></a>
-</span><span id="k_0-210"><a href="#k_0-210"><span class="linenos">210</span></a><span class="sd">    Parameters</span>
-</span><span id="k_0-211"><a href="#k_0-211"><span class="linenos">211</span></a><span class="sd">    ----------</span>
-</span><span id="k_0-212"><a href="#k_0-212"><span class="linenos">212</span></a><span class="sd">    speed_sound : float</span>
-</span><span id="k_0-213"><a href="#k_0-213"><span class="linenos">213</span></a><span class="sd">        The speed of sound.</span>
-</span><span id="k_0-214"><a href="#k_0-214"><span class="linenos">214</span></a><span class="sd">    freqs : np.ndarray</span>
-</span><span id="k_0-215"><a href="#k_0-215"><span class="linenos">215</span></a><span class="sd">        An array of frequencies.</span>
-</span><span id="k_0-216"><a href="#k_0-216"><span class="linenos">216</span></a>
-</span><span id="k_0-217"><a href="#k_0-217"><span class="linenos">217</span></a><span class="sd">    Returns</span>
-</span><span id="k_0-218"><a href="#k_0-218"><span class="linenos">218</span></a><span class="sd">    -------</span>
-</span><span id="k_0-219"><a href="#k_0-219"><span class="linenos">219</span></a><span class="sd">    np.ndarray</span>
-</span><span id="k_0-220"><a href="#k_0-220"><span class="linenos">220</span></a><span class="sd">        An array of wavenumbers.</span>
-</span><span id="k_0-221"><a href="#k_0-221"><span class="linenos">221</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="k_0-222"><a href="#k_0-222"><span class="linenos">222</span></a>    <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">freqs</span> <span class="o">/</span> <span class="n">speed_sound</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="k_0-242"><a href="#k_0-242"><span class="linenos">242</span></a><span class="k">def</span> <span class="nf">k_0</span><span class="p">(</span><span class="n">speed_sound</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">freqs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+</span><span id="k_0-243"><a href="#k_0-243"><span class="linenos">243</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="k_0-244"><a href="#k_0-244"><span class="linenos">244</span></a><span class="sd">    Calculate the wavenumber for a given speed of sound and frequencies.</span>
+</span><span id="k_0-245"><a href="#k_0-245"><span class="linenos">245</span></a>
+</span><span id="k_0-246"><a href="#k_0-246"><span class="linenos">246</span></a><span class="sd">    Parameters</span>
+</span><span id="k_0-247"><a href="#k_0-247"><span class="linenos">247</span></a><span class="sd">    ----------</span>
+</span><span id="k_0-248"><a href="#k_0-248"><span class="linenos">248</span></a><span class="sd">    speed_sound : float</span>
+</span><span id="k_0-249"><a href="#k_0-249"><span class="linenos">249</span></a><span class="sd">        The speed of sound.</span>
+</span><span id="k_0-250"><a href="#k_0-250"><span class="linenos">250</span></a><span class="sd">    freqs : np.ndarray</span>
+</span><span id="k_0-251"><a href="#k_0-251"><span class="linenos">251</span></a><span class="sd">        An array of frequencies.</span>
+</span><span id="k_0-252"><a href="#k_0-252"><span class="linenos">252</span></a>
+</span><span id="k_0-253"><a href="#k_0-253"><span class="linenos">253</span></a><span class="sd">    Returns</span>
+</span><span id="k_0-254"><a href="#k_0-254"><span class="linenos">254</span></a><span class="sd">    -------</span>
+</span><span id="k_0-255"><a href="#k_0-255"><span class="linenos">255</span></a><span class="sd">    np.ndarray</span>
+</span><span id="k_0-256"><a href="#k_0-256"><span class="linenos">256</span></a><span class="sd">        An array of wavenumbers.</span>
+</span><span id="k_0-257"><a href="#k_0-257"><span class="linenos">257</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="k_0-258"><a href="#k_0-258"><span class="linenos">258</span></a>    <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">freqs</span> <span class="o">/</span> <span class="n">speed_sound</span>
 </span></pre></div>
 
 
@@ -1015,37 +1157,37 @@ An array of frequencies.</li>
 
     </div>
     <a class="headerlink" href="#tf_i_r"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="tf_i_r-224"><a href="#tf_i_r-224"><span class="linenos">224</span></a><span class="k">def</span> <span class="nf">tf_i_r</span><span class="p">(</span>
-</span><span id="tf_i_r-225"><a href="#tf_i_r-225"><span class="linenos">225</span></a>        <span class="n">temperature</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
-</span><span id="tf_i_r-226"><a href="#tf_i_r-226"><span class="linenos">226</span></a>        <span class="n">freqs</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
-</span><span id="tf_i_r-227"><a href="#tf_i_r-227"><span class="linenos">227</span></a>        <span class="n">s</span> <span class="p">:</span> <span class="nb">float</span>
-</span><span id="tf_i_r-228"><a href="#tf_i_r-228"><span class="linenos">228</span></a>        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-</span><span id="tf_i_r-229"><a href="#tf_i_r-229"><span class="linenos">229</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="tf_i_r-230"><a href="#tf_i_r-230"><span class="linenos">230</span></a><span class="sd">    Calculate the transfer functions for the incident and reflected sound.</span>
-</span><span id="tf_i_r-231"><a href="#tf_i_r-231"><span class="linenos">231</span></a>
-</span><span id="tf_i_r-232"><a href="#tf_i_r-232"><span class="linenos">232</span></a><span class="sd">    Parameters</span>
-</span><span id="tf_i_r-233"><a href="#tf_i_r-233"><span class="linenos">233</span></a><span class="sd">    ----------</span>
-</span><span id="tf_i_r-234"><a href="#tf_i_r-234"><span class="linenos">234</span></a><span class="sd">    temperature : float</span>
-</span><span id="tf_i_r-235"><a href="#tf_i_r-235"><span class="linenos">235</span></a><span class="sd">        The temperature in degrees Celsius.</span>
-</span><span id="tf_i_r-236"><a href="#tf_i_r-236"><span class="linenos">236</span></a><span class="sd">    freqs : np.ndarray</span>
-</span><span id="tf_i_r-237"><a href="#tf_i_r-237"><span class="linenos">237</span></a><span class="sd">        The array of frequencies.</span>
-</span><span id="tf_i_r-238"><a href="#tf_i_r-238"><span class="linenos">238</span></a><span class="sd">    s : float</span>
-</span><span id="tf_i_r-239"><a href="#tf_i_r-239"><span class="linenos">239</span></a><span class="sd">        The distance between the microphones.</span>
-</span><span id="tf_i_r-240"><a href="#tf_i_r-240"><span class="linenos">240</span></a>
-</span><span id="tf_i_r-241"><a href="#tf_i_r-241"><span class="linenos">241</span></a><span class="sd">    Returns</span>
-</span><span id="tf_i_r-242"><a href="#tf_i_r-242"><span class="linenos">242</span></a><span class="sd">    -------</span>
-</span><span id="tf_i_r-243"><a href="#tf_i_r-243"><span class="linenos">243</span></a><span class="sd">    tuple[np.ndarray, np.ndarray]</span>
-</span><span id="tf_i_r-244"><a href="#tf_i_r-244"><span class="linenos">244</span></a><span class="sd">        A tuple containing the transfer functions for the incident and reflected sound.</span>
-</span><span id="tf_i_r-245"><a href="#tf_i_r-245"><span class="linenos">245</span></a>
-</span><span id="tf_i_r-246"><a href="#tf_i_r-246"><span class="linenos">246</span></a><span class="sd">    Notes</span>
-</span><span id="tf_i_r-247"><a href="#tf_i_r-247"><span class="linenos">247</span></a><span class="sd">    -----</span>
-</span><span id="tf_i_r-248"><a href="#tf_i_r-248"><span class="linenos">248</span></a><span class="sd">    The transfer functions are calculated using the speed of sound at the given temperature and the array of frequencies.</span>
-</span><span id="tf_i_r-249"><a href="#tf_i_r-249"><span class="linenos">249</span></a><span class="sd">    The transfer function for the incident sound is calculated as exp(-1j * k_0 * s), where k_0 is the wavenumber.</span>
-</span><span id="tf_i_r-250"><a href="#tf_i_r-250"><span class="linenos">250</span></a><span class="sd">    The transfer function for the reflected sound is calculated as exp(1j * k_0 * s), where k_0 is the wavenumber.</span>
-</span><span id="tf_i_r-251"><a href="#tf_i_r-251"><span class="linenos">251</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="tf_i_r-252"><a href="#tf_i_r-252"><span class="linenos">252</span></a>    <span class="n">tf_I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">k_0</span><span class="p">(</span><span class="n">calc_speed_sound</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span> <span class="n">freqs</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span><span class="p">)</span>
-</span><span id="tf_i_r-253"><a href="#tf_i_r-253"><span class="linenos">253</span></a>    <span class="n">tf_R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">k_0</span><span class="p">(</span><span class="n">calc_speed_sound</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span> <span class="n">freqs</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span><span class="p">)</span>
-</span><span id="tf_i_r-254"><a href="#tf_i_r-254"><span class="linenos">254</span></a>    <span class="k">return</span> <span class="n">tf_I</span><span class="p">,</span> <span class="n">tf_R</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="tf_i_r-260"><a href="#tf_i_r-260"><span class="linenos">260</span></a><span class="k">def</span> <span class="nf">tf_i_r</span><span class="p">(</span>
+</span><span id="tf_i_r-261"><a href="#tf_i_r-261"><span class="linenos">261</span></a>        <span class="n">temperature</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
+</span><span id="tf_i_r-262"><a href="#tf_i_r-262"><span class="linenos">262</span></a>        <span class="n">freqs</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+</span><span id="tf_i_r-263"><a href="#tf_i_r-263"><span class="linenos">263</span></a>        <span class="n">s</span> <span class="p">:</span> <span class="nb">float</span>
+</span><span id="tf_i_r-264"><a href="#tf_i_r-264"><span class="linenos">264</span></a>        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+</span><span id="tf_i_r-265"><a href="#tf_i_r-265"><span class="linenos">265</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="tf_i_r-266"><a href="#tf_i_r-266"><span class="linenos">266</span></a><span class="sd">    Calculate the transfer functions for the incident and reflected sound.</span>
+</span><span id="tf_i_r-267"><a href="#tf_i_r-267"><span class="linenos">267</span></a>
+</span><span id="tf_i_r-268"><a href="#tf_i_r-268"><span class="linenos">268</span></a><span class="sd">    Parameters</span>
+</span><span id="tf_i_r-269"><a href="#tf_i_r-269"><span class="linenos">269</span></a><span class="sd">    ----------</span>
+</span><span id="tf_i_r-270"><a href="#tf_i_r-270"><span class="linenos">270</span></a><span class="sd">    temperature : float</span>
+</span><span id="tf_i_r-271"><a href="#tf_i_r-271"><span class="linenos">271</span></a><span class="sd">        The temperature in degrees Celsius.</span>
+</span><span id="tf_i_r-272"><a href="#tf_i_r-272"><span class="linenos">272</span></a><span class="sd">    freqs : np.ndarray</span>
+</span><span id="tf_i_r-273"><a href="#tf_i_r-273"><span class="linenos">273</span></a><span class="sd">        The array of frequencies.</span>
+</span><span id="tf_i_r-274"><a href="#tf_i_r-274"><span class="linenos">274</span></a><span class="sd">    s : float</span>
+</span><span id="tf_i_r-275"><a href="#tf_i_r-275"><span class="linenos">275</span></a><span class="sd">        The distance between the microphones.</span>
+</span><span id="tf_i_r-276"><a href="#tf_i_r-276"><span class="linenos">276</span></a>
+</span><span id="tf_i_r-277"><a href="#tf_i_r-277"><span class="linenos">277</span></a><span class="sd">    Returns</span>
+</span><span id="tf_i_r-278"><a href="#tf_i_r-278"><span class="linenos">278</span></a><span class="sd">    -------</span>
+</span><span id="tf_i_r-279"><a href="#tf_i_r-279"><span class="linenos">279</span></a><span class="sd">    tuple[np.ndarray, np.ndarray]</span>
+</span><span id="tf_i_r-280"><a href="#tf_i_r-280"><span class="linenos">280</span></a><span class="sd">        A tuple containing the transfer functions for the incident and reflected sound.</span>
+</span><span id="tf_i_r-281"><a href="#tf_i_r-281"><span class="linenos">281</span></a>
+</span><span id="tf_i_r-282"><a href="#tf_i_r-282"><span class="linenos">282</span></a><span class="sd">    Notes</span>
+</span><span id="tf_i_r-283"><a href="#tf_i_r-283"><span class="linenos">283</span></a><span class="sd">    -----</span>
+</span><span id="tf_i_r-284"><a href="#tf_i_r-284"><span class="linenos">284</span></a><span class="sd">    The transfer functions are calculated using the speed of sound at the given temperature and the array of frequencies.</span>
+</span><span id="tf_i_r-285"><a href="#tf_i_r-285"><span class="linenos">285</span></a><span class="sd">    The transfer function for the incident sound is calculated as exp(-1j * k_0 * s), where k_0 is the wavenumber.</span>
+</span><span id="tf_i_r-286"><a href="#tf_i_r-286"><span class="linenos">286</span></a><span class="sd">    The transfer function for the reflected sound is calculated as exp(1j * k_0 * s), where k_0 is the wavenumber.</span>
+</span><span id="tf_i_r-287"><a href="#tf_i_r-287"><span class="linenos">287</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="tf_i_r-288"><a href="#tf_i_r-288"><span class="linenos">288</span></a>    <span class="n">tf_I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">k_0</span><span class="p">(</span><span class="n">calc_speed_sound</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span> <span class="n">freqs</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span><span class="p">)</span>
+</span><span id="tf_i_r-289"><a href="#tf_i_r-289"><span class="linenos">289</span></a>    <span class="n">tf_R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">k_0</span><span class="p">(</span><span class="n">calc_speed_sound</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span> <span class="n">freqs</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span><span class="p">)</span>
+</span><span id="tf_i_r-290"><a href="#tf_i_r-290"><span class="linenos">290</span></a>    <span class="k">return</span> <span class="n">tf_I</span><span class="p">,</span> <span class="n">tf_R</span>
 </span></pre></div>
 
 
@@ -1088,37 +1230,37 @@ The transfer function for the reflected sound is calculated as exp(1j * k_0 * s)
 
     </div>
     <a class="headerlink" href="#reflection_factor"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="reflection_factor-256"><a href="#reflection_factor-256"><span class="linenos">256</span></a><span class="k">def</span> <span class="nf">reflection_factor</span><span class="p">(</span>
-</span><span id="reflection_factor-257"><a href="#reflection_factor-257"><span class="linenos">257</span></a>        <span class="n">tf_I</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
-</span><span id="reflection_factor-258"><a href="#reflection_factor-258"><span class="linenos">258</span></a>        <span class="n">tf_R</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
-</span><span id="reflection_factor-259"><a href="#reflection_factor-259"><span class="linenos">259</span></a>        <span class="n">tf_12</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
-</span><span id="reflection_factor-260"><a href="#reflection_factor-260"><span class="linenos">260</span></a>        <span class="n">temperature</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
-</span><span id="reflection_factor-261"><a href="#reflection_factor-261"><span class="linenos">261</span></a>        <span class="n">freqs</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
-</span><span id="reflection_factor-262"><a href="#reflection_factor-262"><span class="linenos">262</span></a>        <span class="n">x1</span> <span class="p">:</span> <span class="nb">float</span>
-</span><span id="reflection_factor-263"><a href="#reflection_factor-263"><span class="linenos">263</span></a>        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span id="reflection_factor-264"><a href="#reflection_factor-264"><span class="linenos">264</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the reflection factor for a given set of parameters.</span>
-</span><span id="reflection_factor-265"><a href="#reflection_factor-265"><span class="linenos">265</span></a>
-</span><span id="reflection_factor-266"><a href="#reflection_factor-266"><span class="linenos">266</span></a><span class="sd">    Parameters</span>
-</span><span id="reflection_factor-267"><a href="#reflection_factor-267"><span class="linenos">267</span></a><span class="sd">    ----------</span>
-</span><span id="reflection_factor-268"><a href="#reflection_factor-268"><span class="linenos">268</span></a><span class="sd">    tf_I : np.ndarray</span>
-</span><span id="reflection_factor-269"><a href="#reflection_factor-269"><span class="linenos">269</span></a><span class="sd">        The transfer function of the incident wave.</span>
-</span><span id="reflection_factor-270"><a href="#reflection_factor-270"><span class="linenos">270</span></a><span class="sd">    tf_R : np.ndarray</span>
-</span><span id="reflection_factor-271"><a href="#reflection_factor-271"><span class="linenos">271</span></a><span class="sd">        The transfer function of the reflected wave.</span>
-</span><span id="reflection_factor-272"><a href="#reflection_factor-272"><span class="linenos">272</span></a><span class="sd">    tf_12 : np.ndarray</span>
-</span><span id="reflection_factor-273"><a href="#reflection_factor-273"><span class="linenos">273</span></a><span class="sd">        The transfer function of the medium between the incident and reflected waves.</span>
-</span><span id="reflection_factor-274"><a href="#reflection_factor-274"><span class="linenos">274</span></a><span class="sd">    temperature : float</span>
-</span><span id="reflection_factor-275"><a href="#reflection_factor-275"><span class="linenos">275</span></a><span class="sd">        The temperature of the medium.</span>
-</span><span id="reflection_factor-276"><a href="#reflection_factor-276"><span class="linenos">276</span></a><span class="sd">    freqs : np.ndarray</span>
-</span><span id="reflection_factor-277"><a href="#reflection_factor-277"><span class="linenos">277</span></a><span class="sd">        The frequencies at which the reflection factor is calculated.</span>
-</span><span id="reflection_factor-278"><a href="#reflection_factor-278"><span class="linenos">278</span></a><span class="sd">    x1 : float</span>
-</span><span id="reflection_factor-279"><a href="#reflection_factor-279"><span class="linenos">279</span></a><span class="sd">        The distance between the incident and reflected waves.</span>
-</span><span id="reflection_factor-280"><a href="#reflection_factor-280"><span class="linenos">280</span></a>
-</span><span id="reflection_factor-281"><a href="#reflection_factor-281"><span class="linenos">281</span></a><span class="sd">    Returns</span>
-</span><span id="reflection_factor-282"><a href="#reflection_factor-282"><span class="linenos">282</span></a><span class="sd">    -------</span>
-</span><span id="reflection_factor-283"><a href="#reflection_factor-283"><span class="linenos">283</span></a><span class="sd">    np.ndarray</span>
-</span><span id="reflection_factor-284"><a href="#reflection_factor-284"><span class="linenos">284</span></a><span class="sd">        The reflection factor at each frequency.</span>
-</span><span id="reflection_factor-285"><a href="#reflection_factor-285"><span class="linenos">285</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="reflection_factor-286"><a href="#reflection_factor-286"><span class="linenos">286</span></a>    <span class="k">return</span> <span class="p">(</span><span class="n">tf_12</span> <span class="o">-</span> <span class="n">tf_I</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">tf_R</span> <span class="o">-</span> <span class="n">tf_12</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">k_0</span><span class="p">(</span><span class="n">calc_speed_sound</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span> <span class="n">freqs</span><span class="p">)</span> <span class="o">*</span> <span class="n">x1</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="reflection_factor-292"><a href="#reflection_factor-292"><span class="linenos">292</span></a><span class="k">def</span> <span class="nf">reflection_factor</span><span class="p">(</span>
+</span><span id="reflection_factor-293"><a href="#reflection_factor-293"><span class="linenos">293</span></a>        <span class="n">tf_I</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+</span><span id="reflection_factor-294"><a href="#reflection_factor-294"><span class="linenos">294</span></a>        <span class="n">tf_R</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+</span><span id="reflection_factor-295"><a href="#reflection_factor-295"><span class="linenos">295</span></a>        <span class="n">tf_12</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+</span><span id="reflection_factor-296"><a href="#reflection_factor-296"><span class="linenos">296</span></a>        <span class="n">temperature</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
+</span><span id="reflection_factor-297"><a href="#reflection_factor-297"><span class="linenos">297</span></a>        <span class="n">freqs</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+</span><span id="reflection_factor-298"><a href="#reflection_factor-298"><span class="linenos">298</span></a>        <span class="n">x1</span> <span class="p">:</span> <span class="nb">float</span>
+</span><span id="reflection_factor-299"><a href="#reflection_factor-299"><span class="linenos">299</span></a>        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+</span><span id="reflection_factor-300"><a href="#reflection_factor-300"><span class="linenos">300</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the reflection factor for a given set of parameters.</span>
+</span><span id="reflection_factor-301"><a href="#reflection_factor-301"><span class="linenos">301</span></a>
+</span><span id="reflection_factor-302"><a href="#reflection_factor-302"><span class="linenos">302</span></a><span class="sd">    Parameters</span>
+</span><span id="reflection_factor-303"><a href="#reflection_factor-303"><span class="linenos">303</span></a><span class="sd">    ----------</span>
+</span><span id="reflection_factor-304"><a href="#reflection_factor-304"><span class="linenos">304</span></a><span class="sd">    tf_I : np.ndarray</span>
+</span><span id="reflection_factor-305"><a href="#reflection_factor-305"><span class="linenos">305</span></a><span class="sd">        The transfer function of the incident wave.</span>
+</span><span id="reflection_factor-306"><a href="#reflection_factor-306"><span class="linenos">306</span></a><span class="sd">    tf_R : np.ndarray</span>
+</span><span id="reflection_factor-307"><a href="#reflection_factor-307"><span class="linenos">307</span></a><span class="sd">        The transfer function of the reflected wave.</span>
+</span><span id="reflection_factor-308"><a href="#reflection_factor-308"><span class="linenos">308</span></a><span class="sd">    tf_12 : np.ndarray</span>
+</span><span id="reflection_factor-309"><a href="#reflection_factor-309"><span class="linenos">309</span></a><span class="sd">        The transfer function of the medium between the incident and reflected waves.</span>
+</span><span id="reflection_factor-310"><a href="#reflection_factor-310"><span class="linenos">310</span></a><span class="sd">    temperature : float</span>
+</span><span id="reflection_factor-311"><a href="#reflection_factor-311"><span class="linenos">311</span></a><span class="sd">        The temperature of the medium.</span>
+</span><span id="reflection_factor-312"><a href="#reflection_factor-312"><span class="linenos">312</span></a><span class="sd">    freqs : np.ndarray</span>
+</span><span id="reflection_factor-313"><a href="#reflection_factor-313"><span class="linenos">313</span></a><span class="sd">        The frequencies at which the reflection factor is calculated.</span>
+</span><span id="reflection_factor-314"><a href="#reflection_factor-314"><span class="linenos">314</span></a><span class="sd">    x1 : float</span>
+</span><span id="reflection_factor-315"><a href="#reflection_factor-315"><span class="linenos">315</span></a><span class="sd">        The distance between the sample and the first microphone position.</span>
+</span><span id="reflection_factor-316"><a href="#reflection_factor-316"><span class="linenos">316</span></a>
+</span><span id="reflection_factor-317"><a href="#reflection_factor-317"><span class="linenos">317</span></a><span class="sd">    Returns</span>
+</span><span id="reflection_factor-318"><a href="#reflection_factor-318"><span class="linenos">318</span></a><span class="sd">    -------</span>
+</span><span id="reflection_factor-319"><a href="#reflection_factor-319"><span class="linenos">319</span></a><span class="sd">    np.ndarray</span>
+</span><span id="reflection_factor-320"><a href="#reflection_factor-320"><span class="linenos">320</span></a><span class="sd">        The reflection factor at each frequency.</span>
+</span><span id="reflection_factor-321"><a href="#reflection_factor-321"><span class="linenos">321</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="reflection_factor-322"><a href="#reflection_factor-322"><span class="linenos">322</span></a>    <span class="k">return</span> <span class="p">(</span><span class="n">tf_12</span> <span class="o">-</span> <span class="n">tf_I</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">tf_R</span> <span class="o">-</span> <span class="n">tf_12</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">k_0</span><span class="p">(</span><span class="n">calc_speed_sound</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span> <span class="n">freqs</span><span class="p">)</span> <span class="o">*</span> <span class="n">x1</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -1138,7 +1280,7 @@ The temperature of the medium.</li>
 <li><strong>freqs</strong> (np.ndarray):
 The frequencies at which the reflection factor is calculated.</li>
 <li><strong>x1</strong> (float):
-The distance between the incident and reflected waves.</li>
+The distance between the sample and the first microphone position.</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
@@ -1161,21 +1303,21 @@ The distance between the incident and reflected waves.</li>
 
     </div>
     <a class="headerlink" href="#absorption_coefficient"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="absorption_coefficient-288"><a href="#absorption_coefficient-288"><span class="linenos">288</span></a><span class="k">def</span> <span class="nf">absorption_coefficient</span><span class="p">(</span><span class="n">reflection_f</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span id="absorption_coefficient-289"><a href="#absorption_coefficient-289"><span class="linenos">289</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="absorption_coefficient-290"><a href="#absorption_coefficient-290"><span class="linenos">290</span></a><span class="sd">    Calculate the absorption coefficient.</span>
-</span><span id="absorption_coefficient-291"><a href="#absorption_coefficient-291"><span class="linenos">291</span></a>
-</span><span id="absorption_coefficient-292"><a href="#absorption_coefficient-292"><span class="linenos">292</span></a><span class="sd">    Parameters</span>
-</span><span id="absorption_coefficient-293"><a href="#absorption_coefficient-293"><span class="linenos">293</span></a><span class="sd">    ----------</span>
-</span><span id="absorption_coefficient-294"><a href="#absorption_coefficient-294"><span class="linenos">294</span></a><span class="sd">    reflection_f : np.ndarray</span>
-</span><span id="absorption_coefficient-295"><a href="#absorption_coefficient-295"><span class="linenos">295</span></a><span class="sd">        The reflection coefficient in the frequency domain.</span>
-</span><span id="absorption_coefficient-296"><a href="#absorption_coefficient-296"><span class="linenos">296</span></a>
-</span><span id="absorption_coefficient-297"><a href="#absorption_coefficient-297"><span class="linenos">297</span></a><span class="sd">    Returns</span>
-</span><span id="absorption_coefficient-298"><a href="#absorption_coefficient-298"><span class="linenos">298</span></a><span class="sd">    -------</span>
-</span><span id="absorption_coefficient-299"><a href="#absorption_coefficient-299"><span class="linenos">299</span></a><span class="sd">    np.ndarray</span>
-</span><span id="absorption_coefficient-300"><a href="#absorption_coefficient-300"><span class="linenos">300</span></a><span class="sd">        The absorption coefficient in the frequency domain.</span>
-</span><span id="absorption_coefficient-301"><a href="#absorption_coefficient-301"><span class="linenos">301</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="absorption_coefficient-302"><a href="#absorption_coefficient-302"><span class="linenos">302</span></a>    <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">reflection_f</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="absorption_coefficient-324"><a href="#absorption_coefficient-324"><span class="linenos">324</span></a><span class="k">def</span> <span class="nf">absorption_coefficient</span><span class="p">(</span><span class="n">reflection_f</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+</span><span id="absorption_coefficient-325"><a href="#absorption_coefficient-325"><span class="linenos">325</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="absorption_coefficient-326"><a href="#absorption_coefficient-326"><span class="linenos">326</span></a><span class="sd">    Calculate the absorption coefficient.</span>
+</span><span id="absorption_coefficient-327"><a href="#absorption_coefficient-327"><span class="linenos">327</span></a>
+</span><span id="absorption_coefficient-328"><a href="#absorption_coefficient-328"><span class="linenos">328</span></a><span class="sd">    Parameters</span>
+</span><span id="absorption_coefficient-329"><a href="#absorption_coefficient-329"><span class="linenos">329</span></a><span class="sd">    ----------</span>
+</span><span id="absorption_coefficient-330"><a href="#absorption_coefficient-330"><span class="linenos">330</span></a><span class="sd">    reflection_f : np.ndarray</span>
+</span><span id="absorption_coefficient-331"><a href="#absorption_coefficient-331"><span class="linenos">331</span></a><span class="sd">        The reflection coefficient in the frequency domain.</span>
+</span><span id="absorption_coefficient-332"><a href="#absorption_coefficient-332"><span class="linenos">332</span></a>
+</span><span id="absorption_coefficient-333"><a href="#absorption_coefficient-333"><span class="linenos">333</span></a><span class="sd">    Returns</span>
+</span><span id="absorption_coefficient-334"><a href="#absorption_coefficient-334"><span class="linenos">334</span></a><span class="sd">    -------</span>
+</span><span id="absorption_coefficient-335"><a href="#absorption_coefficient-335"><span class="linenos">335</span></a><span class="sd">    np.ndarray</span>
+</span><span id="absorption_coefficient-336"><a href="#absorption_coefficient-336"><span class="linenos">336</span></a><span class="sd">        The absorption coefficient in the frequency domain.</span>
+</span><span id="absorption_coefficient-337"><a href="#absorption_coefficient-337"><span class="linenos">337</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="absorption_coefficient-338"><a href="#absorption_coefficient-338"><span class="linenos">338</span></a>    <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">reflection_f</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
 </span></pre></div>
 
 
@@ -1208,33 +1350,33 @@ The reflection coefficient in the frequency domain.</li>
 
     </div>
     <a class="headerlink" href="#surface_impedance"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="surface_impedance-304"><a href="#surface_impedance-304"><span class="linenos">304</span></a><span class="k">def</span> <span class="nf">surface_impedance</span><span class="p">(</span>
-</span><span id="surface_impedance-305"><a href="#surface_impedance-305"><span class="linenos">305</span></a>        <span class="n">reflection_f</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
-</span><span id="surface_impedance-306"><a href="#surface_impedance-306"><span class="linenos">306</span></a>        <span class="n">temperature</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
-</span><span id="surface_impedance-307"><a href="#surface_impedance-307"><span class="linenos">307</span></a>        <span class="n">atm_pressure</span> <span class="p">:</span> <span class="nb">float</span>
-</span><span id="surface_impedance-308"><a href="#surface_impedance-308"><span class="linenos">308</span></a>        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span id="surface_impedance-309"><a href="#surface_impedance-309"><span class="linenos">309</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the surface impedance.</span>
-</span><span id="surface_impedance-310"><a href="#surface_impedance-310"><span class="linenos">310</span></a>
-</span><span id="surface_impedance-311"><a href="#surface_impedance-311"><span class="linenos">311</span></a><span class="sd">    This function calculates the surface impedance based on the reflection factor, temperature, and atmospheric pressure.</span>
-</span><span id="surface_impedance-312"><a href="#surface_impedance-312"><span class="linenos">312</span></a>
-</span><span id="surface_impedance-313"><a href="#surface_impedance-313"><span class="linenos">313</span></a><span class="sd">    Parameters</span>
-</span><span id="surface_impedance-314"><a href="#surface_impedance-314"><span class="linenos">314</span></a><span class="sd">    ----------</span>
-</span><span id="surface_impedance-315"><a href="#surface_impedance-315"><span class="linenos">315</span></a><span class="sd">    reflection_f : np.ndarray</span>
-</span><span id="surface_impedance-316"><a href="#surface_impedance-316"><span class="linenos">316</span></a><span class="sd">        The reflection factor.</span>
-</span><span id="surface_impedance-317"><a href="#surface_impedance-317"><span class="linenos">317</span></a><span class="sd">    temperature : float</span>
-</span><span id="surface_impedance-318"><a href="#surface_impedance-318"><span class="linenos">318</span></a><span class="sd">        The temperature in degrees Celsius.</span>
-</span><span id="surface_impedance-319"><a href="#surface_impedance-319"><span class="linenos">319</span></a><span class="sd">    atm_pressure : float</span>
-</span><span id="surface_impedance-320"><a href="#surface_impedance-320"><span class="linenos">320</span></a><span class="sd">        The atmospheric pressure in Pascal.</span>
-</span><span id="surface_impedance-321"><a href="#surface_impedance-321"><span class="linenos">321</span></a>
-</span><span id="surface_impedance-322"><a href="#surface_impedance-322"><span class="linenos">322</span></a><span class="sd">    Returns</span>
-</span><span id="surface_impedance-323"><a href="#surface_impedance-323"><span class="linenos">323</span></a><span class="sd">    -------</span>
-</span><span id="surface_impedance-324"><a href="#surface_impedance-324"><span class="linenos">324</span></a><span class="sd">    float</span>
-</span><span id="surface_impedance-325"><a href="#surface_impedance-325"><span class="linenos">325</span></a><span class="sd">        The surface impedance.</span>
-</span><span id="surface_impedance-326"><a href="#surface_impedance-326"><span class="linenos">326</span></a>
-</span><span id="surface_impedance-327"><a href="#surface_impedance-327"><span class="linenos">327</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="surface_impedance-328"><a href="#surface_impedance-328"><span class="linenos">328</span></a>    <span class="n">char_impedance_air</span> <span class="o">=</span> <span class="n">calc_char_impedance_air</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="n">atm_pressure</span><span class="p">)</span>
-</span><span id="surface_impedance-329"><a href="#surface_impedance-329"><span class="linenos">329</span></a>    <span class="n">surf_impedance</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">reflection_f</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">reflection_f</span><span class="p">)</span><span class="o">*</span><span class="n">char_impedance_air</span>
-</span><span id="surface_impedance-330"><a href="#surface_impedance-330"><span class="linenos">330</span></a>    <span class="k">return</span> <span class="n">surf_impedance</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="surface_impedance-340"><a href="#surface_impedance-340"><span class="linenos">340</span></a><span class="k">def</span> <span class="nf">surface_impedance</span><span class="p">(</span>
+</span><span id="surface_impedance-341"><a href="#surface_impedance-341"><span class="linenos">341</span></a>        <span class="n">reflection_f</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+</span><span id="surface_impedance-342"><a href="#surface_impedance-342"><span class="linenos">342</span></a>        <span class="n">temperature</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
+</span><span id="surface_impedance-343"><a href="#surface_impedance-343"><span class="linenos">343</span></a>        <span class="n">atm_pressure</span> <span class="p">:</span> <span class="nb">float</span>
+</span><span id="surface_impedance-344"><a href="#surface_impedance-344"><span class="linenos">344</span></a>        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span id="surface_impedance-345"><a href="#surface_impedance-345"><span class="linenos">345</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the surface impedance.</span>
+</span><span id="surface_impedance-346"><a href="#surface_impedance-346"><span class="linenos">346</span></a>
+</span><span id="surface_impedance-347"><a href="#surface_impedance-347"><span class="linenos">347</span></a><span class="sd">    This function calculates the surface impedance based on the reflection factor, temperature, and atmospheric pressure.</span>
+</span><span id="surface_impedance-348"><a href="#surface_impedance-348"><span class="linenos">348</span></a>
+</span><span id="surface_impedance-349"><a href="#surface_impedance-349"><span class="linenos">349</span></a><span class="sd">    Parameters</span>
+</span><span id="surface_impedance-350"><a href="#surface_impedance-350"><span class="linenos">350</span></a><span class="sd">    ----------</span>
+</span><span id="surface_impedance-351"><a href="#surface_impedance-351"><span class="linenos">351</span></a><span class="sd">    reflection_f : np.ndarray</span>
+</span><span id="surface_impedance-352"><a href="#surface_impedance-352"><span class="linenos">352</span></a><span class="sd">        The reflection factor.</span>
+</span><span id="surface_impedance-353"><a href="#surface_impedance-353"><span class="linenos">353</span></a><span class="sd">    temperature : float</span>
+</span><span id="surface_impedance-354"><a href="#surface_impedance-354"><span class="linenos">354</span></a><span class="sd">        The temperature in degrees Celsius.</span>
+</span><span id="surface_impedance-355"><a href="#surface_impedance-355"><span class="linenos">355</span></a><span class="sd">    atm_pressure : float</span>
+</span><span id="surface_impedance-356"><a href="#surface_impedance-356"><span class="linenos">356</span></a><span class="sd">        The atmospheric pressure in Pascal.</span>
+</span><span id="surface_impedance-357"><a href="#surface_impedance-357"><span class="linenos">357</span></a>
+</span><span id="surface_impedance-358"><a href="#surface_impedance-358"><span class="linenos">358</span></a><span class="sd">    Returns</span>
+</span><span id="surface_impedance-359"><a href="#surface_impedance-359"><span class="linenos">359</span></a><span class="sd">    -------</span>
+</span><span id="surface_impedance-360"><a href="#surface_impedance-360"><span class="linenos">360</span></a><span class="sd">    float</span>
+</span><span id="surface_impedance-361"><a href="#surface_impedance-361"><span class="linenos">361</span></a><span class="sd">        The surface impedance.</span>
+</span><span id="surface_impedance-362"><a href="#surface_impedance-362"><span class="linenos">362</span></a>
+</span><span id="surface_impedance-363"><a href="#surface_impedance-363"><span class="linenos">363</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="surface_impedance-364"><a href="#surface_impedance-364"><span class="linenos">364</span></a>    <span class="n">char_impedance_air</span> <span class="o">=</span> <span class="n">calc_char_impedance_air</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="n">atm_pressure</span><span class="p">)</span>
+</span><span id="surface_impedance-365"><a href="#surface_impedance-365"><span class="linenos">365</span></a>    <span class="n">surf_impedance</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">reflection_f</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">reflection_f</span><span class="p">)</span><span class="o">*</span><span class="n">char_impedance_air</span>
+</span><span id="surface_impedance-366"><a href="#surface_impedance-366"><span class="linenos">366</span></a>    <span class="k">return</span> <span class="n">surf_impedance</span>
 </span></pre></div>
 
 
