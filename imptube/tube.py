@@ -53,6 +53,8 @@ class Measurement:
         higher frequency limit for the generated sweep
     fs_to_spl : float
         conversion level from dBFS to dB SPL for microphone 1
+    sweep_lvl : float
+        level of the sweep in dBFS
     """
 
     def __init__(
@@ -66,7 +68,8 @@ class Measurement:
             sub_measurements : int=2,
             f_low : int=10,
             f_high : int=1000,
-            fs_to_spl : float=130  
+            fs_to_spl : float=130,
+            sweep_lvl : float=-6  
         ):
         self.channels_in = channels_in
         self.channels_out = channels_out
@@ -77,11 +80,12 @@ class Measurement:
         self.f_limits = [f_low, f_high]
         self.fs_to_spl = fs_to_spl
 
-        self.sweep = self.make_sweep(
+        self.make_sweep(
             samples=samples,
             window_len=window_len,
             f_low=f_low,
-            f_high=f_high
+            f_high=f_high,
+            sweep_lvl=sweep_lvl
         )
         sd.default.samplerate = fs
         sd.default.channels = len(channels_in), len(channels_out)
@@ -93,7 +97,8 @@ class Measurement:
             samples : int=65536,
             window_len : int=8192,
             f_low : int=10,
-            f_high : int=1000
+            f_high : int=1000,
+            sweep_lvl : float=-6
             ) -> np.ndarray:
         """Generates numpy array with log sweep.
 
@@ -125,8 +130,10 @@ class Measurement:
 
         log_sweep[:half_win] = log_sweep[:half_win]*window[:half_win]
         log_sweep[-half_win:] = log_sweep[-half_win:]*window[half_win:]
-        log_sweep = log_sweep/4
+        lvl_to_factor = 10**(sweep_lvl/20)
+        log_sweep = log_sweep*lvl_to_factor
 
+        self.sweep = log_sweep
         return log_sweep
 
     def measure(self,
