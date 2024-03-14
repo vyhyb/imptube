@@ -71,35 +71,24 @@ class Measurement:
             fs_to_spl : float=130,
             sweep_lvl : float=-6  
         ):
+        self.fs = fs
         self.channels_in = channels_in
         self.channels_out = channels_out
         self.device = device
-        self.fs = fs
-        self.sub_measurements = sub_measurements
         self.samples = samples
+        self.window_len = window_len
+        self.sub_measurements = sub_measurements
         self.f_limits = [f_low, f_high]
         self.fs_to_spl = fs_to_spl
+        self.sweep_lvl = sweep_lvl
 
-        self.make_sweep(
-            samples=samples,
-            window_len=window_len,
-            f_low=f_low,
-            f_high=f_high,
-            sweep_lvl=sweep_lvl
-        )
+        self.make_sweep()
         sd.default.samplerate = fs
         sd.default.channels = len(channels_in), len(channels_out)
         sd.default.device = device
 
 
-    def make_sweep(self,
-            fs : int=48000,
-            samples : int=65536,
-            window_len : int=8192,
-            f_low : int=10,
-            f_high : int=1000,
-            sweep_lvl : float=-6
-            ) -> np.ndarray:
+    def make_sweep(self) -> np.ndarray:
         """Generates numpy array with log sweep.
 
         Parameters
@@ -122,19 +111,23 @@ class Measurement:
         log_sweep : np.ndarray
             numpy array containing mono log sweep
         """
-        t = np.linspace(0,samples/fs,samples, dtype=np.float32)
+        t = np.linspace(0,self.samples/self.fs,self.samples, dtype=np.float32)
         
-        half_win = int(window_len)
-        log_sweep = chirp(t, f_low, t[-1], f_high, method="log", phi=90)
-        window = hann(int(window_len*2))
+        half_win = int(self.window_len)
+        log_sweep = chirp(t, self.f_limits[0], t[-1], self.f_limits[1], method="log", phi=90)
+        window = hann(int(self.window_len*2))
 
         log_sweep[:half_win] = log_sweep[:half_win]*window[:half_win]
         log_sweep[-half_win:] = log_sweep[-half_win:]*window[half_win:]
-        lvl_to_factor = 10**(sweep_lvl/20)
+        lvl_to_factor = 10**(self.sweep_lvl/20)
         log_sweep = log_sweep*lvl_to_factor
 
         self.sweep = log_sweep
         return log_sweep
+    
+    def change_sweep(self):
+        """Regenerates the sweep."""
+        self.make_sweep()
 
     def measure(self,
             out_path : str='',
