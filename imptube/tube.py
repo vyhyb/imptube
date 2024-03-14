@@ -125,7 +125,7 @@ class Measurement:
         self.sweep = log_sweep
         return log_sweep
     
-    def change_sweep(self):
+    def regen_sweep(self):
         """Regenerates the sweep."""
         self.make_sweep()
 
