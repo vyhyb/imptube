@@ -299,8 +299,7 @@ def alpha_from_path(
         bc : pd.DataFrame=None, 
         return_f : bool=False,
         return_r : bool=False,
-        return_z : bool=False,
-        atm_pressure : float=None
+        return_z : bool=False
         ) -> tuple[np.ndarray]:
     """Calculate the absorption coefficient from the given parent folder path.
 

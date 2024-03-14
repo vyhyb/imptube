@@ -412,8 +412,8 @@ def calculate_alpha(
         sample.trees[2],
         return_f=True,
         return_r=return_r,
-        return_z=return_z,
-        atm_pressure=sample.atm_pressure)
+        return_z=return_z
+        )
     return results
 
 class Sensor(Protocol):
