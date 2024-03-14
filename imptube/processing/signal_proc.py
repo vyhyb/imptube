@@ -233,9 +233,10 @@ def calc_char_impedance_air(temperature : float, atm_pressure : float) -> float:
     float
         The characteristic impedance of air.
     """
-    char_impedance = NORMAL_DENSITY*(
+    density = NORMAL_DENSITY*(
         (atm_pressure*NORMAL_TEMPERATURE)/(NORMAL_PRESSURE*(temperature+273))
     )
+    char_impedance = density * calc_speed_sound(temperature)
     return char_impedance
 
 def k_0(speed_sound: float, freqs: np.ndarray) -> np.ndarray:
