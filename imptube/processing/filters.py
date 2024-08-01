@@ -145,7 +145,8 @@ def harmonic_distortion_filter(
         ) -> np.ndarray:
     '''
     Combination of IR and TF filtering for removing harmonic distortion from measured signal.
-    Note: Use with reasonably slow sweep rates to avoid artifacts.
+    Note: Use with reasonably slow sweep rates to avoid artifacts 
+    due to harmonics appearing in the beginning of the IR.
 
     Parameters
     ----------
