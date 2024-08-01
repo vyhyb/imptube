@@ -91,11 +91,11 @@ def tf_filtering(
     r_win = r_win[int(len(r_win)/2):]
     
     window[idx_low:idx_low+len(l_win)] = l_win
-    window[idx_low:idx_high] = 1
+    window[idx_low+len(l_win):idx_high-len(r_win)] = 1
     window[idx_high-len(r_win):idx_high] = r_win
 
     window[-(idx_low+len(l_win)):-idx_low] = l_win[::-1]
-    window[-idx_high:-idx_low] = 1
+    window[-(idx_high-len(r_win)):-(idx_low+len(l_win))] = 1
     window[-idx_high:-(idx_high-len(r_win))] = r_win[::-1]
     return tf*window, window
 
@@ -113,24 +113,6 @@ def ir_filtering(impulse_response: np.ndarray) -> np.ndarray:
     np.ndarray
         The filtered impulse response with the second half cut out.
     """
-    cut = int(len(impulse_response) / 2)
-    impulse_response[cut:] = 0 
-    return impulse_response
-
-def ir_filtering(impulse_response: np.ndarray) -> np.ndarray:
-    """
-    This function cuts out the second half of the impulse response, which contains harmonic distortion products.
-
-    Parameters
-    ----------
-    impulse_response : np.ndarray
-        The input impulse response array.
-
-    Returns
-    -------
-    np.ndarray
-        The filtered impulse response array.
-    """    
     cut = int(len(impulse_response) / 2)
     impulse_response[cut:] = 0 
     return impulse_response
@@ -163,6 +145,7 @@ def harmonic_distortion_filter(
         ) -> np.ndarray:
     '''
     Combination of IR and TF filtering for removing harmonic distortion from measured signal.
+    Note: Use with reasonably slow sweep rates to avoid artifacts.
 
     Parameters
     ----------
@@ -177,8 +160,8 @@ def harmonic_distortion_filter(
         Higher frequency limit of the reference.
     fs : int
         Sampling frequency.
-    roll_fwd : bool
-        Sets the direction for reference signal rolling. This is done to keep the end of the measured sweep.
+    roll_fwd : bool | None
+        Sets the direction for reference signal rolling. This is done to avoid data loss in the IR. Use None for no rolling (shorter sweeps)
 
     Returns
     -------
@@ -191,15 +174,17 @@ def harmonic_distortion_filter(
     p_ref = extend_with_zeros(p_ref)
     if roll_fwd == True:
         p_ref = np.roll(p_ref, -int(octave_span/2))
-    else:
+    elif roll_fwd == False:
         p_ref = np.roll(p_ref, int(octave_span/2))
+    else:
+        p_ref = p_ref
     
     p_1, p_2 = stereo_to_spectra(p_time)
     p_ref = np.fft.fft(p_ref)
     tf_1 = transfer_function(p_ref, p_1)
     tf_2 = transfer_function(p_ref, p_2)
-    tf_1 = tf_filtering(tf_1, lowcut=f_low*2, highcut=f_high)[0]
-    tf_2 = tf_filtering(tf_2, lowcut=f_low*2, highcut=f_high)[0]
+    tf_1 = tf_filtering(tf_1, lowcut=f_low, highcut=f_high)[0]
+    tf_2 = tf_filtering(tf_2, lowcut=f_low, highcut=f_high)[0]
     ir_1 = np.fft.ifft(tf_1)
     ir_2 = np.fft.ifft(tf_2)
 
