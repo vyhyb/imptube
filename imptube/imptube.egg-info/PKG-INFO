@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: imptube
-Version: 0.0.5
+Version: 0.0.6
 Summary: A package for impedance tube measurements.
 Home-page: https://github.com/vyhyb/imptube/tree/main
 Author: David Jun
@@ -11,8 +11,16 @@ Classifier: Programming Language :: Python :: 3.9
 Classifier: Operating System :: OS Independent
 Requires-Python: >=3.9
 Description-Content-Type: text/markdown
-Provides-Extra: dev
 License-File: LICENSE
+Requires-Dist: sounddevice
+Requires-Dist: soundfile
+Requires-Dist: scipy
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: logging
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: twine; extra == "dev"
 
 # imptube
 
@@ -60,7 +68,7 @@ measurement = imp.Measurement(device=15)  # Create an instance of the Measuremen
 # Perform the configuration 1 measurement
 data, fs = measurement.measure(export=False, thd_filter=True)  
 p11, p12 = imp.stereo_to_spectra(data.T)
-freqs = imp.frequencies(p11, fs)https://vyhyb.github.io/imptube/
+freqs = imp.frequencies(p11, fs)
 
 input("Ready to measure in the second configuration?") 
 

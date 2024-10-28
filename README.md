@@ -44,7 +44,7 @@ measurement = imp.Measurement(device=15)  # Create an instance of the Measuremen
 # Perform the configuration 1 measurement
 data, fs = measurement.measure(export=False, thd_filter=True)  
 p11, p12 = imp.stereo_to_spectra(data.T)
-freqs = imp.frequencies(p11, fs)https://vyhyb.github.io/imptube/
+freqs = imp.frequencies(p11, fs)
 
 input("Ready to measure in the second configuration?") 
 
