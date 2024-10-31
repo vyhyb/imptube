@@ -7,9 +7,14 @@ from typing import Tuple
 
 from .signal_proc import stereo_to_spectra, transfer_function
 
-def spectral_filtering(arr: np.ndarray, low_pass: int) -> np.ndarray:
+def spectral_filtering(arr: np.ndarray, low_pass: int, nperseg: int=64) -> np.ndarray:
     """
     Apply spectral filtering to an array.
+
+    Example usage: On a measured transfer function, to remove high-frequency noise.
+
+    The functioning might be slightly counterintuitive, since we use FFT to get
+    H(f) ->FFT-> H(t*), so it is more equivalent to windowing in the time domain.
 
     Parameters
     ----------
@@ -23,10 +28,24 @@ def spectral_filtering(arr: np.ndarray, low_pass: int) -> np.ndarray:
     np.ndarray
         The filtered array.
     """
-    spectrum = stft(arr, nperseg=64)
+    spectrum = stft(arr, nperseg=nperseg)
     for s in spectrum[2].T:
         s[low_pass:] = 0
     return istft(spectrum[2])[1][:len(arr)]
+
+def noise_filtering(arr: np.ndarray) -> np.ndarray:
+    """Suitable for H(f) noise filtering.
+    It takes the input array, calculates the iFFT, windows the peak, and then FFTs it back.
+    """
+    arr = np.fft.ifft(arr)
+    # 10ms window
+    win = windows.tukey(480)
+    window = np.zeros_like(arr)
+    window[:len(win)] = win
+    window = np.roll(window, -int(len(window)/2))
+
+    arr = arr * window
+    return np.fft.fft(arr)
 
 def extend_with_zeros(p_time : np.ndarray) -> np.ndarray:
     """

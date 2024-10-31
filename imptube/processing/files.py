@@ -15,8 +15,9 @@ from .signal_proc import (
     reflection_factor, 
     absorption_coefficient,
     surface_impedance,
-    tf_i_r
+    tf_i_r,
 )
+from .filters import noise_filtering
 from ..utils import filter, read_folder
 
 
@@ -181,7 +182,8 @@ def calibration_from_files(
         path1: str = None,
         path2: str = None, 
         parent_folder: str = None, 
-        export: bool = True
+        export: bool = True,
+        noise_filter: bool = False
         ) -> tuple[np.ndarray, np.ndarray]:
     """
     Perform calibration from audio files.
@@ -246,6 +248,9 @@ def calibration_from_files(
         p12_np = p12_np.mean(axis=0)
         
         cf = calibration_factor(p11_np, p12_np, p21_np, p22_np)
+        if noise_filter:
+            cf = noise_filtering(cf)
+
         freqs = fftfreq(f1[0][1].shape[0], 1/f1[0][0])
         if export == True:
             base_name = os.path.split(parent_folder)[1]
@@ -254,7 +259,8 @@ def calibration_from_files(
     return cf, freqs
 
 def transfer_function_from_path(
-        parent_folder: str
+        parent_folder: str,
+        noise_filter: bool = False
         ) -> tuple[np.ndarray, np.ndarray]:
     """Calculate transfer functions from audio files in the given parent folder.
 
@@ -286,6 +292,8 @@ def transfer_function_from_path(
     tfs = []
     for d in unique_d:
         tf = transfer_function_from_file(folder=audio_folder, filter_str=d)
+        if noise_filter:
+            tf = noise_filtering(tf)
         tfs.append(tf[:limit_idx])
         np.save(arr=tfs[-1], file=os.path.join(tf_folder, os.path.split(parent_folder)[1]+"_tf_"+d+".npy"))
 

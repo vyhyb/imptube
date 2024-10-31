@@ -11,7 +11,9 @@ from .files import (
     alpha_from_path)
 
 from .filters import (
-    harmonic_distortion_filter
+    harmonic_distortion_filter,
+    spectral_filtering,
+    noise_filtering,
 )
 
 from .signal_proc import (

@@ -16,7 +16,8 @@ from imptube.processing import (
     transfer_function_from_path,
     alpha_from_path,
     harmonic_distortion_filter,
-    calc_rms_pressure_level
+    calc_rms_pressure_level,
+    spectral_filtering
 )
 from typing import Protocol
 import logging
@@ -156,7 +157,8 @@ class Measurement:
         data = sd.playrec(
             self.sweep, 
             input_mapping=self.channels_in, 
-            output_mapping=self.channels_out)
+            output_mapping=self.channels_out,
+            dtype=np.float32)
         sd.wait()
         data = np.asarray(data)
 
@@ -299,8 +301,10 @@ class Sample:
 def calibration(
         sample : Sample,
         measurement : Measurement,
-        thd_filter = True
-        ):
+        thd_filter : bool=True,
+        export : bool=True,
+        noise_filter : bool=False,
+        ) -> tuple[np.ndarray, np.ndarray]:
     """Performs CLI calibration measurement.
     
     Parameters
@@ -335,8 +339,10 @@ def calibration(
         else:
             running = False
         input("Move the microphones to original position before measurement!")
+    
+    cal = calibration_from_files(parent_folder=sample.trees[2], export=export, noise_filter=noise_filter)
 
-    return calibration_from_files(parent_folder=sample.trees[2])
+    return cal
 
 def single_measurement(
         sample : Sample,
@@ -384,6 +390,7 @@ def calculate_alpha(
         sample : Sample,
         return_r : bool = False,
         return_z : bool = False,
+        noise_filter : bool = False
         ) -> tuple[np.ndarray, np.ndarray]:
     """Performs transfer function and alpha calculations from audio data
     found in a valid folder structure.
@@ -400,7 +407,7 @@ def calculate_alpha(
     freqs : np.ndarray
         frequency values for the alpha array
     """
-    sample.unique_d, sample.tfs = transfer_function_from_path(sample.trees[2])
+    sample.unique_d, sample.tfs = transfer_function_from_path(sample.trees[2], noise_filter=noise_filter)
     results = alpha_from_path(
         sample.trees[2],
         return_f=True,
