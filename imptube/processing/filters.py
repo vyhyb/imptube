@@ -33,16 +33,20 @@ def spectral_filtering(arr: np.ndarray, low_pass: int, nperseg: int=64) -> np.nd
         s[low_pass:] = 0
     return istft(spectrum[2])[1][:len(arr)]
 
-def noise_filtering(arr: np.ndarray) -> np.ndarray:
+def noise_filtering(
+        arr: np.ndarray,
+        len_win: int=4800,
+        alpha: float=0.8
+        ) -> np.ndarray:
     """Suitable for H(f) noise filtering.
     It takes the input array, calculates the iFFT, windows the peak, and then FFTs it back.
     """
     arr = np.fft.ifft(arr)
-    # 10ms window
-    win = windows.tukey(480)
+    # 100ms window
+    win = windows.tukey(len_win, alpha=alpha)
     window = np.zeros_like(arr)
     window[:len(win)] = win
-    window = np.roll(window, -int(len(window)/2))
+    window = np.roll(window, -int(len(win)/2))
 
     arr = arr * window
     return np.fft.fft(arr)
