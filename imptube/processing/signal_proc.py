@@ -406,3 +406,43 @@ def calc_velocity_at_surface(
         char_impedance_air * (np.exp(-1j * wavenumber * x) + reflection_f * np.exp(1j * wavenumber * x))
     )
     return velocity 
+
+def calc_pressure_at_surface(
+        pressure_x: np.ndarray,
+        x: float,
+        reflection_f: np.ndarray,
+        freqs: np.ndarray,
+        speed_sound: float,
+):
+    """
+    Calculate the pressure at the sample surface.
+
+    Parameters
+    ----------
+    pressure_x : np.ndarray
+        The pressure at the microphone.
+    x : float
+        The distance between the sample and the microphone.
+    reflection_f : np.ndarray
+        The pressure reflection factor.
+    freqs : np.ndarray
+        The frequencies at which the pressure is calculated.
+    speed_sound : float
+        The speed of sound in air.
+
+    Returns
+    -------
+    np.ndarray
+        The pressure at the surface.
+
+    Notes
+    -----
+    It uses following formula to calculate the pressure at the surface:
+    $p(0) = p(x_1)\frac{(1+R)}{(e^{-jk_xd} + Re^{jk_xd})}$
+    """
+    wavenumber = calc_wavenumber(speed_sound, freqs)
+    pressure = pressure_x * (1 + reflection_f) / (
+        np.exp(-1j * wavenumber * x) + reflection_f * np.exp(1j * wavenumber * x)
+    )
+    return pressure
+    
