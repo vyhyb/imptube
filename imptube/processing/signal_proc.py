@@ -239,7 +239,7 @@ def calc_char_impedance_air(temperature : float, atm_pressure : float) -> float:
     char_impedance = density * calc_speed_sound(temperature)
     return char_impedance
 
-def k_0(speed_sound: float, freqs: np.ndarray) -> np.ndarray:
+def calc_wavenumber(speed_sound: float, freqs: np.ndarray) -> np.ndarray:
     """
     Calculate the wavenumber for a given speed of sound and frequencies.
 
@@ -285,8 +285,8 @@ def tf_i_r(
     The transfer function for the incident sound is calculated as exp(-1j * k_0 * s), where k_0 is the wavenumber.
     The transfer function for the reflected sound is calculated as exp(1j * k_0 * s), where k_0 is the wavenumber.
     """
-    tf_I = np.exp(- 1j * k_0(calc_speed_sound(temperature), freqs) * s)
-    tf_R = np.exp(1j * k_0(calc_speed_sound(temperature), freqs) * s)
+    tf_I = np.exp(- 1j * calc_wavenumber(calc_speed_sound(temperature), freqs) * s)
+    tf_R = np.exp(1j * calc_wavenumber(calc_speed_sound(temperature), freqs) * s)
     return tf_I, tf_R
 
 def reflection_factor(
@@ -319,7 +319,7 @@ def reflection_factor(
     np.ndarray
         The reflection factor at each frequency.
     """
-    return (tf_12 - tf_I)/(tf_R - tf_12) * np.exp(2j * k_0(calc_speed_sound(temperature), freqs) * x1)
+    return (tf_12 - tf_I)/(tf_R - tf_12) * np.exp(2j * calc_wavenumber(calc_speed_sound(temperature), freqs) * x1)
 
 def absorption_coefficient(reflection_f: np.ndarray) -> np.ndarray:
     """
@@ -364,3 +364,45 @@ def surface_impedance(
     char_impedance_air = calc_char_impedance_air(temperature, atm_pressure)
     surf_impedance = (1+reflection_f)/(1-reflection_f)*char_impedance_air
     return surf_impedance
+
+def calc_velocity_at_surface(
+        pressure_x: np.ndarray,
+        x: float,
+        reflection_f: np.ndarray,
+        freqs: np.ndarray,
+        char_impedance_air: float,
+        speed_sound: float,
+):
+    """
+    Calculate the velocity at the surface.
+
+    Parameters
+    ----------
+    pressure_x : np.ndarray
+        The pressure at the microphone.
+    x : float
+        The distance between the sample and the microphone.
+    reflection_f : np.ndarray
+        The pressure reflection factor.
+    freqs : np.ndarray
+        The frequencies at which the velocity is calculated.
+    char_impedance_air : float
+        The characteristic impedance of air.
+    speed_sound : float
+        The speed of sound in air.
+
+    Returns
+    -------
+    np.ndarray
+        The velocity at the surface.
+
+    Notes
+    -----
+    It uses following formula to calculate the velocity at the surface:
+    $u(0) = \frac{p(x_m) \cdot (1 - R)}{Z_0 \left( e^{-jkx_m} + R e^{jkx_m} \right)} \tag{2.1}$
+    """
+    wavenumber = calc_wavenumber(speed_sound, freqs)
+    velocity = pressure_x * (1 - reflection_f) / (
+        char_impedance_air * (np.exp(-1j * wavenumber * x) + reflection_f * np.exp(1j * wavenumber * x))
+    )
+    return velocity 

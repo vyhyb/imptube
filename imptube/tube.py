@@ -16,8 +16,7 @@ from imptube.processing import (
     transfer_function_from_path,
     alpha_from_path,
     harmonic_distortion_filter,
-    calc_rms_pressure_level,
-    spectral_filtering
+    calc_rms_pressure_level
 )
 from typing import Protocol
 import logging
