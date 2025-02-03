@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import soundfile as sf
 import os
+from scipy.io import wavfile
 from scipy.signal import chirp
 from scipy.signal.windows import hann
 from time import sleep, strftime
@@ -82,13 +83,18 @@ class Measurement:
         self.fs_to_spl = fs_to_spl
         self.sweep_lvl = sweep_lvl
 
+        self.boundary_df = pd.DataFrame({"fs_to_spl": [fs_to_spl]})
+        self.boundary_df.to_csv(
+            strftime("%y-%m-%d_%H-%M") + "_lvl_calib.csv"
+        )
+
         self.make_sweep()
         sd.default.samplerate = fs
         sd.default.channels = len(channels_in), len(channels_out)
         sd.default.device = device
 
 
-    def make_sweep(self) -> np.ndarray:
+    def make_sweep(self, windows=True) -> np.ndarray:
         """Generates numpy array with log sweep.
 
         Parameters
@@ -115,10 +121,12 @@ class Measurement:
         
         half_win = int(self.window_len)
         log_sweep = chirp(t, self.f_limits[0], t[-1], self.f_limits[1], method="log", phi=90)
-        window = hann(int(self.window_len*2))
-
-        log_sweep[:half_win] = log_sweep[:half_win]*window[:half_win]
-        log_sweep[-half_win:] = log_sweep[-half_win:]*window[half_win:]
+        
+        if windows:
+            window = hann(int(self.window_len*2))
+            log_sweep[:half_win] = log_sweep[:half_win]*window[:half_win]
+            log_sweep[-half_win:] = log_sweep[-half_win:]*window[half_win:]
+        
         lvl_to_factor = 10**(self.sweep_lvl/20)
         log_sweep = log_sweep*lvl_to_factor
 
@@ -128,6 +136,77 @@ class Measurement:
     def regen_sweep(self):
         """Regenerates the sweep."""
         self.make_sweep()
+
+    def update_sweep_lvl(self):
+        """Updates the sweep level."""
+        self.sweep = self.sweep/np.max(np.abs(self.sweep))
+        self.sweep = self.sweep * 10**(self.sweep_lvl/20)
+
+    def filter_sweep(
+        self,
+        rfft_incident_pressure: np.ndarray,
+        f_limits=(10, 400),
+        ) -> np.ndarray:
+        """Filters the sweep with respect to incident pressure measured beforehand.
+
+        Parameters
+        ----------
+        rfft_incident_pressure : np.ndarray
+            rfft of incident pressure
+        f_lim : tuple[int, int]
+            frequency limits for the filtering
+        
+        Returns
+        -------
+        filtered_sweep : np.ndarray
+            filtered sweep
+        """
+        # generate sweep without windows
+        sweep_wo_win = self.make_sweep(windows=False)
+
+        # apply blackman window to the ends of the sweep
+        win = np.blackman(self.window_len//4)
+        sweep_wo_win[:len(win)//2] = sweep_wo_win[:len(win)//2] * win[:len(win)//2]
+        sweep_wo_win[-len(win)//2:] = sweep_wo_win[-len(win)//2:] * win[-len(win)//2:]
+
+        # calculate rfft of the sweep
+        rfft_sweep = np.fft.rfft(sweep_wo_win)
+        rfft_freqs = np.fft.rfftfreq(len(sweep_wo_win), d=1/self.fs)
+        
+        # find indices of frequency limits
+        f_low_idx = np.argmin(np.abs(rfft_freqs-f_limits[0]))
+        f_high_idx = np.argmin(np.abs(rfft_freqs-f_limits[1]))
+
+        # calculate amplitude of the filtered sweep spectrum
+        amplitude = np.abs(rfft_sweep) / np.abs(rfft_incident_pressure)
+        filtered_sweep_spectrum = amplitude * np.exp(1j*np.angle(rfft_sweep))
+
+        # construct and apply filter based on blackman windows
+        filt = np.blackman(50)
+        filter = np.ones_like(filtered_sweep_spectrum)
+        filter[:f_low_idx] = 0
+        filter[f_low_idx:f_low_idx+len(filt)//2] = filt[:len(filt)//2]
+        filter[-f_high_idx-len(filt)//2:-f_high_idx] = filt[len(filt)//2:]
+        filter[-f_high_idx:] = 0
+        filtered_sweep_spectrum *= filter
+
+        # calculate ifft of the filtered sweep spectrum
+        filtered_sweep = np.fft.irfft(filtered_sweep_spectrum)
+
+        # apply hanning window to the ends of the filtered sweep
+        window = np.hanning(self.window_len)
+        filtered_sweep[:len(window)//2] = filtered_sweep[:len(window)//2] * window[:len(window)//2]
+        filtered_sweep[-len(window)//2:] = filtered_sweep[-len(window)//2:] * window[len(window)//2:]
+
+        # normalize the filtered sweep
+        filtered_sweep = filtered_sweep/np.max(np.abs(filtered_sweep))
+
+        # apply level to the filtered sweep based on measurement level
+        lvl_to_factor = 10**(self.sweep_lvl/20)
+        filtered_sweep = filtered_sweep*lvl_to_factor
+
+        self.sweep = filtered_sweep
+        return filtered_sweep
 
     def measure(self,
             out_path : str='',
@@ -182,6 +261,47 @@ class Measurement:
                 )
         
         return data, self.fs
+    
+    def calc_incident_pressure_filter(
+        self,
+        spectrum: np.ndarray,
+        r: np.ndarray,
+        f: np.ndarray,
+        distance: float,
+        speed_of_sound: float = 343,
+        f_limits=(10, 400)
+        ) -> np.ndarray:
+        def calculate_incident_pressure(
+            pressure, 
+            reflection_factor, 
+            distance,
+            wavenumber
+        ):
+            return pressure / (
+                np.exp(-1j * wavenumber * distance) 
+                + reflection_factor * np.exp(1j * wavenumber * distance)
+            )
+        
+        sweep_spectrum = np.fft.rfft(self.sweep.copy())
+        # calculate incident pressure
+        f_low_idx = np.argmin(np.abs(f-f_limits[0]))
+        f_high_idx = np.argmin(np.abs(f-f_limits[1]))
+        incident_pressure = calculate_incident_pressure(
+            pressure=spectrum,
+            reflection_factor=r[f_low_idx:f_high_idx],
+            distance=distance,
+            wavenumber=2*np.pi*f[f_low_idx:f_high_idx]/speed_of_sound
+        )
+
+        #extend incident pressure to have the same length as sweep_spectrum
+        incident_pressure = np.concatenate([np.ones(f_low_idx)*incident_pressure[0], incident_pressure])
+        incident_pressure = np.concatenate([incident_pressure, np.ones(len(sweep_spectrum)-len(incident_pressure))*incident_pressure[-1]])
+
+        # smoothen incident pressure by applying a moving average convolution filter with a window of 10 samples
+        incident_pressure = np.convolve(np.abs(incident_pressure), np.hanning(20), mode="same")*np.exp(1j*np.angle(incident_pressure))
+        # normalize incident by the actual amplitude of the sweep used in the measurement
+        incident_pressure = incident_pressure / np.abs(sweep_spectrum)
+        return incident_pressure
 
 class Tube:
     """Class representing tube geometry.
@@ -250,8 +370,7 @@ class Sample:
             'atm_pressure': [self.atm_pressure],
             'x1': [self.tube.further_mic_dist],
             'x2': [self.tube.closer_mic_dist],
-            'lim': [self.tube.freq_limit],
-            'dbfs_to_spl': [130],
+            'lim': [self.tube.freq_limit]
             }
         self.boundary_df = pd.DataFrame(bound_dict)
         self.boundary_df.to_csv(
@@ -440,6 +559,27 @@ def read_env_bc(sensor : Sensor) -> tuple[float, float, float]:
             sys.exit()
     return temperature, rel_humidity, atm_pressure
 
+def calculate_spectrum(
+    sample: Sample,
+    substring: str,
+    f_limits=(10, 400)
+):
+    audio_files = os.listdir(sample.trees[4][0])
+    filtered_files = [f for f in audio_files if substring in f]
+    audio_data = []
+    for f in filtered_files:
+        fs, data = wavfile.read(f"{sample.trees[4][0]}/{f}")
+        audio_data.append(data.T[0])
+    audio_data = np.array(audio_data)
+    audio_data = np.mean(audio_data, axis=0)
+    
+    audio_spectrum = np.fft.rfft(audio_data)
+    audio_freqs = np.fft.rfftfreq(len(audio_data), d=1/fs)
+    flow_idx = np.argmin(np.abs(audio_freqs-f_limits[0]))
+    fhigh_idx = np.argmin(np.abs(audio_freqs-f_limits[1]))
+    audio_spectrum = audio_spectrum[flow_idx:fhigh_idx]
+    audio_freqs = audio_freqs[flow_idx:fhigh_idx]
+    return audio_spectrum, audio_freqs
     #  TODO save bc as config file...
     #  bound_dict = {
     #     'temp': [self.temperature],
