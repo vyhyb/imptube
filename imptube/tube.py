@@ -271,12 +271,58 @@ class Measurement:
         speed_of_sound: float = 343,
         f_limits=(10, 400)
         ) -> np.ndarray:
+        """
+        Calculates incident pressure filter based on the measured 
+        spectrum and reflection factor.
+        Such filter can be used to filter the input sweep
+        to compensate for the loudspeaker frequency response.
+
+        Parameters
+        ----------
+        spectrum : np.ndarray
+            measured spectrum
+        r : np.ndarray
+            reflection factor
+        f : np.ndarray
+            frequency values
+        distance : float
+            distance between the sample and the microphone
+        speed_of_sound : float
+            speed of sound in air
+        f_limits : tuple[int, int]
+            frequency limits for the filtering
+
+        Returns
+        -------
+        incident_pressure : np.ndarray
+            incident pressure filter
+        """
         def calculate_incident_pressure(
-            pressure, 
-            reflection_factor, 
-            distance,
-            wavenumber
+            pressure: np.ndarray, 
+            reflection_factor: np.ndarray, 
+            distance: float,
+            wavenumber: np.ndarray
         ):
+            """
+            Calculates incident pressure based on the measured 
+            spectrum and the reflection factor.
+
+            Parameters
+            ----------
+            pressure : np.ndarray
+                measured pressure
+            reflection_factor : np.ndarray
+                reflection factor
+            distance : float
+                distance between the sample and the microphone
+            wavenumber : np.ndarray
+                wavenumber
+
+            Returns
+            -------
+            incident_pressure : np.ndarray
+                incident pressure filter
+            """
             return pressure / (
                 np.exp(-1j * wavenumber * distance) 
                 + reflection_factor * np.exp(1j * wavenumber * distance)
@@ -294,10 +340,16 @@ class Measurement:
         )
 
         #extend incident pressure to have the same length as sweep_spectrum
-        incident_pressure = np.concatenate([np.ones(f_low_idx)*incident_pressure[0], incident_pressure])
-        incident_pressure = np.concatenate([incident_pressure, np.ones(len(sweep_spectrum)-len(incident_pressure))*incident_pressure[-1]])
+        incident_pressure = np.concatenate([
+            np.ones(f_low_idx)*incident_pressure[0], 
+            incident_pressure
+            ])
+        incident_pressure = np.concatenate([
+            incident_pressure, 
+            np.ones(len(sweep_spectrum)-len(incident_pressure))*incident_pressure[-1]
+            ])
 
-        # smoothen incident pressure by applying a moving average convolution filter with a window of 10 samples
+        # smoothen incident pressure by applying a moving average convolution filter with a window of 20 samples
         incident_pressure = np.convolve(np.abs(incident_pressure), np.hanning(20), mode="same")*np.exp(1j*np.angle(incident_pressure))
         # normalize incident by the actual amplitude of the sweep used in the measurement
         incident_pressure = incident_pressure / np.abs(sweep_spectrum)
