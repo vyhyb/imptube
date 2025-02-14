@@ -450,3 +450,58 @@ def alpha_from_path(
         ret.append(impedances)
         
     return tuple(ret)
+
+def average_audio(
+        parent_folder : str,
+        direct_folder : str = None,
+        ) -> None:
+    """Average audio files obtained for each variant of 'd' value.
+    'd' value originaly represented cavity depth in resonator measurement,
+    but can be used as a general identifier for different measurement conditions.
+
+    By incorporating this function, the user can do extensive measurements 
+    while keeping the data comsumption low.
+    
+    Parameters
+    ----------
+    parent_folder : str
+        The path to the parent folder of the measurement.
+    direct_folder : str, optional
+        The direct path to the audio folder, by default None.
+    """
+    if direct_folder is None:
+        audio_folder = os.path.join(parent_folder, "measurement", "audio")
+    else:
+        audio_folder = direct_folder
+
+    
+    audio_files = read_folder(audio_folder)
+
+    audio_files_d_filtered = []
+    for f in audio_files:
+        idx1 = f.rfind("d")
+        idx2 = f.rfind("_")
+        audio_files_d_filtered.append(f[idx1:idx2])
+    unique_d = np.unique(np.array(audio_files_d_filtered))
+
+    for d in unique_d:
+        files = filter(audio_files, [d])
+        audio = []
+        for f in files:
+            audio.append(read_file(f)[1])
+
+        audio_np = np.array(audio)
+        print(audio_np.shape)
+        audio_np = audio_np.mean(axis=0)
+        print(audio_np.shape)
+        fs = read_file(files[0])[0]
+
+        wav.write(
+            files[0],
+            fs,
+            audio_np
+        )
+
+        # remove other files
+        for f in files[1:]:
+            os.remove(f)
