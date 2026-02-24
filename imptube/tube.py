@@ -11,11 +11,11 @@ from scipy.io import wavfile
 from scipy.signal import chirp
 from scipy.signal.windows import hann
 from time import sleep, strftime
-from imptube.utils import make_foldertree
+# from imptube.utils import make_foldertree
 from imptube.processing import (
-    calibration_from_files,
-    transfer_function_from_path,
-    alpha_from_path,
+    # calibration_from_files,
+    # transfer_function_from_path,
+    # alpha_from_path,
     harmonic_distortion_filter,
     calc_rms_pressure_level
 )
@@ -83,10 +83,10 @@ class Measurement:
         self.fs_to_spl = fs_to_spl
         self.sweep_lvl = sweep_lvl
 
-        self.boundary_df = pd.DataFrame({"fs_to_spl": [fs_to_spl]})
-        self.boundary_df.to_csv(
-            strftime("%y-%m-%d_%H-%M") + "_lvl_calib.csv"
-        )
+        # self.boundary_df = pd.DataFrame({"fs_to_spl": [fs_to_spl]})
+        # self.boundary_df.to_csv(
+        #     strftime("%y-%m-%d_%H-%M") + "_lvl_calib.csv"
+        # )
 
         self.make_sweep()
         sd.default.samplerate = fs
@@ -209,9 +209,9 @@ class Measurement:
         return filtered_sweep
 
     def measure(self,
-            out_path : str='',
+            # out_path : str='',
             thd_filter : bool=True,
-            export : bool=True
+            # export : bool=True
             ) -> tuple[np.ndarray, int]:
         """Performs measurement and saves the recording. 
         
