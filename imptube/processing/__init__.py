@@ -17,5 +17,8 @@ from .filters import (
 )
 
 from .signal_proc import (
-    calc_rms_pressure_level
+    calc_rms_pressure_level,
+    stereo_to_spectra,
+    transfer_function,
+    calibration_factor,
 )

@@ -13,7 +13,10 @@ from scipy.signal.windows import hann
 from time import sleep, strftime
 from imptube.processing import (
     harmonic_distortion_filter,
-    calc_rms_pressure_level
+    calc_rms_pressure_level,
+    stereo_to_spectra,
+    calibration_factor,
+    noise_filtering,
 )
 from typing import Protocol
 import logging
@@ -367,7 +370,8 @@ class Tube:
         self.freq_limit = freq_limit
 
 class Sample:
-    """A class representing sample and its boundary conditions.
+    """A class representing sample and its boundary conditions as well as
+    the data from the measurement and calibration.
     
     Attributes
     ----------
@@ -398,12 +402,14 @@ class Sample:
         self.atm_pressure = atm_pressure
         self.rel_humidity = rel_humidity
         self.tube = tube
+        self.cf = None
+        self.tfs = None
+
 
 def calibration(
         sample : Sample,
         measurement : Measurement,
         thd_filter : bool=True,
-        export : bool=True,
         noise_filter : bool=False,
         ) -> tuple[np.ndarray, np.ndarray]:
     """Performs CLI calibration measurement.
@@ -421,7 +427,7 @@ def calibration(
     # caltree = sample.trees[3][0]
     # if not os.path.exists(caltree):
     #     os.makedirs(caltree)
-
+    cal_data = [[], []]
     m = measurement
     running = True
     while running:
@@ -430,10 +436,12 @@ def calibration(
             if ready.lower() == "n":
                 break
             else:
-                for s in range(m.sub_measurements):
+                cal_data[c-1] = []
+                for _ in range(m.sub_measurements):
                     # f = os.path.join(caltree, sample.trees[1]+f"_cal_wav_conf{c}_{s}.wav")
                     # print(f)
-                    # m.measure(f, thd_filter=thd_filter)
+                    data, _ = m.measure()
+                    cal_data[c-1].append(data)
                     sleep(0.5)
         if input("Repeat calibration process? [y/N]").lower() == "y":
             continue
@@ -441,10 +449,34 @@ def calibration(
             running = False
         input("Move the microphones to original position before measurement!")
     
-    # cal = calibration_from_files(parent_folder=sample.trees[2], export=export, noise_filter=noise_filter)
+    # average calibration data for both configurations
+    
+    cal_data = [np.mean(cal_data[0], axis=0), np.mean(cal_data[1], axis=0)]
 
+    if thd_filter:
+        cal_data[0] = harmonic_distortion_filter(
+            p_time=cal_data[0],
+            p_ref=m.sweep,
+            f_low=m.f_limits[0],
+            f_high=m.f_limits[1],
+            fs=m.fs
+        )
+        cal_data[1] = harmonic_distortion_filter(
+            p_time=cal_data[1],
+            p_ref=m.sweep,
+            f_low=m.f_limits[0],
+            f_high=m.f_limits[1],
+            fs=m.fs
+        )
 
-    return cal
+    p11, p12 = stereo_to_spectra(cal_data[0])
+    p21, p22 = stereo_to_spectra(cal_data[1])
+    sample.cf = calibration_factor(p11, p12, p21, p22)
+    
+    if noise_filter:
+        sample.cf = noise_filtering(sample.cf)
+    
+    return sample.cf
 
 def single_measurement(
         sample : Sample,
