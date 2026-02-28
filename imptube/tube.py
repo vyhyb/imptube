@@ -366,9 +366,9 @@ class Tube:
         higher frequency limit for exports
     """
     def __init__(self,
-            further_mic_dist : float=0.400115, #x_1
-            closer_mic_dist : float=0.101755, #x_2
-            freq_limit : int=2000,
+            further_mic_dist : float, #x_1
+            closer_mic_dist : float, #x_2
+            freq_limit : int,
             ):
         self.further_mic_dist = further_mic_dist
         self.closer_mic_dist = closer_mic_dist
@@ -528,17 +528,19 @@ class Sample:
 
             return p1, p2
         
+        input("Ready to perform measurement? [Enter]")
+
         p11, p12 = _measure()
         self.tf = transfer_function(p11, p12)
 
         if self.cf is not None:
             self.tf_corrected = self.tf / self.cf
         else:
-            input("No calibration factor found. Switch the microphones and press Enter to perform calibration measurement.")
+            input("Calibration needed. Switch the microphones and press Enter.")
             p21, p22 = _measure()
             self.cf = calibration_factor(p11, p12, p21, p22)
             self.tf_corrected = self.tf / self.cf
-            input("Calibration complete. Switch the microphones back to original position and press Enter to proceed.")
+            input("Calibration complete. \nSwitch the microphones back to original configuration and press Enter to proceed.")
 
         if noise_filter:
             self.tf_corrected = noise_filtering(self.tf_corrected)
