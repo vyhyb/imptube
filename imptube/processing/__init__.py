@@ -21,4 +21,9 @@ from .signal_proc import (
     stereo_to_spectra,
     transfer_function,
     calibration_factor,
+    frequencies,
+    tf_i_r,
+    reflection_factor,
+    absorption_coefficient,
+    surface_impedance
 )

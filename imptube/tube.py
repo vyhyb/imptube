@@ -17,6 +17,12 @@ from imptube.processing import (
     stereo_to_spectra,
     calibration_factor,
     noise_filtering,
+    transfer_function,
+    frequencies,
+    tf_i_r,
+    reflection_factor,
+    absorption_coefficient,
+    surface_impedance
 )
 from typing import Protocol
 import logging
@@ -385,8 +391,6 @@ class Sample:
         impedance tube definition object
     timestamp : str
         strftime timestamp in a format '%y-%m-%d_%H-%M'
-    folder : str
-        path to project data folder, defaults to "data"
     """
     def __init__(self,
             name : str,
@@ -402,153 +406,188 @@ class Sample:
         self.atm_pressure = atm_pressure
         self.rel_humidity = rel_humidity
         self.tube = tube
+        self.freqs = None
         self.cf = None
-        self.tfs = None
+        self.tf = None
 
 
-def calibration(
-        sample : Sample,
-        measurement : Measurement,
-        thd_filter : bool=True,
-        noise_filter : bool=False,
-        ) -> tuple[np.ndarray, np.ndarray]:
-    """Performs CLI calibration measurement.
-    
-    Parameters
-    ----------
-
-    sample : imptube.tube.Sample
+    def calibration(
+            self,
+            measurement : Measurement,
+            thd_filter : bool=True,
+            noise_filter : bool=False,
+            ) -> tuple[np.ndarray, np.ndarray]:
+        """Performs CLI calibration measurement.
         
-    measurement : Measurement
+        Parameters
+        ----------
 
-    thd_filter : bool
-        Enables harmonic distortion filtering
-    """
-    # caltree = sample.trees[3][0]
-    # if not os.path.exists(caltree):
-    #     os.makedirs(caltree)
-    cal_data = [[], []]
-    m = measurement
-    running = True
-    while running:
-        for c in range(1, 3):
-            ready = input(f"Calibrate in configuration {c}? [Y/n]")
-            if ready.lower() == "n":
-                break
+        sample : imptube.tube.Sample
+            
+        measurement : Measurement
+
+        thd_filter : bool
+            Enables harmonic distortion filtering
+        """
+        cal_data = [[], []]
+        m = measurement
+        running = True
+        while running:
+            for c in range(1, 3):
+                ready = input(f"Calibrate in configuration {c}? [Y/n]")
+                if ready.lower() == "n":
+                    break
+                else:
+                    cal_data[c-1] = []
+                    for _ in range(m.sub_measurements):
+                        data, _ = m.measure()
+                        cal_data[c-1].append(data)
+                        sleep(0.5)
+            if input("Repeat calibration process? [y/N]").lower() == "y":
+                continue
             else:
-                cal_data[c-1] = []
-                for _ in range(m.sub_measurements):
-                    # f = os.path.join(caltree, sample.trees[1]+f"_cal_wav_conf{c}_{s}.wav")
-                    # print(f)
-                    data, _ = m.measure()
-                    cal_data[c-1].append(data)
-                    sleep(0.5)
-        if input("Repeat calibration process? [y/N]").lower() == "y":
-            continue
-        else:
-            running = False
-        input("Move the microphones to original position before measurement!")
-    
-    # average calibration data for both configurations
-    
-    cal_data = [np.mean(cal_data[0], axis=0), np.mean(cal_data[1], axis=0)]
-
-    if thd_filter:
-        cal_data[0] = harmonic_distortion_filter(
-            p_time=cal_data[0],
-            p_ref=m.sweep,
-            f_low=m.f_limits[0],
-            f_high=m.f_limits[1],
-            fs=m.fs
-        )
-        cal_data[1] = harmonic_distortion_filter(
-            p_time=cal_data[1],
-            p_ref=m.sweep,
-            f_low=m.f_limits[0],
-            f_high=m.f_limits[1],
-            fs=m.fs
-        )
-
-    p11, p12 = stereo_to_spectra(cal_data[0])
-    p21, p22 = stereo_to_spectra(cal_data[1])
-    sample.cf = calibration_factor(p11, p12, p21, p22)
-    
-    if noise_filter:
-        sample.cf = noise_filtering(sample.cf)
-    
-    return sample.cf
-
-def single_measurement(
-        sample : Sample,
-        measurement : Measurement,
-        depth : float,
-        thd_filter : bool= True,
-        calc_spl : bool = True
-        ) -> tuple[list[np.ndarray], int]:
-    """Performs measurement.
-    
-    Parameters
-    ----------
-
-    sample : imptube.tube.Sample
+                running = False
+            input("Move the microphones to original position before measurement!")
         
-    measurement : Measurement
+        cal_data = [np.mean(cal_data[0], axis=0), np.mean(cal_data[1], axis=0)]
 
-    depth : float
-        current depth of the sample
-    thd_filter : bool
-        Enables harmonic distortion filtering
+        if thd_filter:
+            cal_data[0] = harmonic_distortion_filter(
+                p_time=cal_data[0],
+                p_ref=m.sweep,
+                f_low=m.f_limits[0],
+                f_high=m.f_limits[1],
+                fs=m.fs
+            )
+            cal_data[1] = harmonic_distortion_filter(
+                p_time=cal_data[1],
+                p_ref=m.sweep,
+                f_low=m.f_limits[0],
+                f_high=m.f_limits[1],
+                fs=m.fs
+            )
 
-    Returns
-    -------
-    sub_measurement_data : list[np.ndarray]
-        list of audio recordings taken
-    fs : float
-        sampling rate of the recording
-    """
-    m = measurement
-    sub_measurement_data = []
-    for s in range(m.sub_measurements):
-        f = os.path.join(sample.trees[4][0], sample.trees[1]+f"_wav_d{depth}_{s}.wav")
-        data, fs = m.measure(f, thd_filter=thd_filter)
-        sub_measurement_data.append(data)
-        sleep(0.5)
+        p11, p12 = stereo_to_spectra(cal_data[0])
+        p21, p22 = stereo_to_spectra(cal_data[1])
+        self.cf = calibration_factor(p11, p12, p21, p22)
+        
+        if noise_filter:
+            self.cf = noise_filtering(self.cf)
+        
+        return self.cf
 
-    if calc_spl:
-        rms_spl = calc_rms_pressure_level(data.T[0], m.fs_to_spl)
-        logging.info(f"RMS SPL: {rms_spl} dB")
+    def single_measurement(
+            self,
+            measurement : Measurement,
+            thd_filter : bool= True,
+            noise_filter : bool = False,
+            calc_spl : bool = True
+            ) -> tuple[list[np.ndarray], int]:
+        """Performs measurement.
+        
+        Parameters
+        ----------
+
+        sample : imptube.tube.Sample
+            
+        measurement : Measurement
+
+        depth : float
+            current depth of the sample
+        thd_filter : bool
+            Enables harmonic distortion filtering
+
+        Returns
+        -------
+        sub_measurement_data : list[np.ndarray]
+            list of audio recordings taken
+        fs : float
+            sampling rate of the recording
+        """
+        m = measurement
+        def _measure():
+            sub_measurement_data = []
+            for _ in range(m.sub_measurements):
+                data, fs = m.measure()
+                sub_measurement_data.append(data)
+                sleep(0.5)
+            
+            avg_data = np.mean(sub_measurement_data, axis=0)
+            if thd_filter:
+                sub_measurement_data = harmonic_distortion_filter(
+                    p_time=avg_data,
+                    p_ref=m.sweep,
+                    f_low=m.f_limits[0],
+                    f_high=m.f_limits[1],
+                    fs=m.fs
+                )
+
+
+            self.freqs = frequencies(avg_data, m.fs)
+            p1, p2 = stereo_to_spectra(avg_data)
+
+            return p1, p2
+        
+        p11, p12 = _measure()
+        self.tf = transfer_function(p11, p12)
+
+        if self.cf is not None:
+            self.tf_corrected = self.tf / self.cf
+        else:
+            input("No calibration factor found. Switch the microphones and press Enter to perform calibration measurement.")
+            p21, p22 = _measure()
+            self.cf = calibration_factor(p11, p12, p21, p22)
+            self.tf_corrected = self.tf / self.cf
+            input("Calibration complete. Switch the microphones back to original position and press Enter to proceed.")
+
+        if noise_filter:
+            self.tf_corrected = noise_filtering(self.tf_corrected)
+
+        if calc_spl:
+                rms_spl = calc_rms_pressure_level(m.data.T[0], m.fs_to_spl)
+                logging.info(f"RMS SPL: {rms_spl} dB")
         m.rms_spl = rms_spl
-    return sub_measurement_data, fs
+        return self.tf_corrected, m.fs
 
-def calculate_alpha(
-        sample : Sample,
-        return_r : bool = False,
-        return_z : bool = False,
-        noise_filter : bool = False
-        ) -> tuple[np.ndarray, np.ndarray]:
-    """Performs transfer function and alpha calculations from audio data
-    found in a valid folder structure.
+    def calculate_alpha(
+            self,
+            return_r : bool = False,
+            return_z : bool = False,
+            ) -> tuple[np.ndarray, np.ndarray]:
+        """Performs transfer function and alpha calculations from audio data
+        found in a valid folder structure.
 
-    Parameters
-    ----------
-    sample : Sample
+        Parameters
+        ----------
+        sample : Sample
 
-    Returns
-    -------
-    alpha : np.ndarray
-        sound absorption coefficient for frequencies lower than 
-        limit specified in sample.tube.freq_limit
-    freqs : np.ndarray
-        frequency values for the alpha array
-    """
-    sample.unique_d, sample.tfs = transfer_function_from_path(sample.trees[2], noise_filter=noise_filter)
-    results = alpha_from_path(
-        sample.trees[2],
-        return_f=True,
-        return_r=return_r,
-        return_z=return_z
-        )
-    return results
+        Returns
+        -------
+        alpha : np.ndarray
+            sound absorption coefficient for frequencies lower than 
+            limit specified in sample.tube.freq_limit
+        freqs : np.ndarray
+            frequency values for the alpha array
+        """
+
+        if self.tf is None:
+            raise ValueError("No transfer function found. Perform measurement first.")
+
+        tf_incident, tf_reflected = tf_i_r(self.temperature, self.freqs, self.tube.mic_spacing)
+        tf_incident = tf_incident
+        tf_reflected = tf_reflected
+
+        rf = reflection_factor(tf_incident, tf_reflected, self.tf_corrected, self.temperature, self.freqs, self.tube.further_mic_dist)
+        an = absorption_coefficient(rf)
+        zs = surface_impedance(rf, self.temperature, self.atm_pressure)
+
+        ret = [an, self.freqs]
+        if return_r:
+            ret.append(rf)
+        if return_z:
+            ret.append(zs)
+
+        return 
 
 class Sensor(Protocol):
     """A protocol for Sensor class implementation."""
@@ -575,27 +614,27 @@ def read_env_bc(sensor : Sensor) -> tuple[float, float, float]:
             sys.exit()
     return temperature, rel_humidity, atm_pressure
 
-def calculate_spectrum(
-    sample: Sample,
-    substring: str,
-    f_limits=(10, 400)
-):
-    audio_files = os.listdir(sample.trees[4][0])
-    filtered_files = [f for f in audio_files if substring in f]
-    audio_data = []
-    for f in filtered_files:
-        fs, data = wavfile.read(f"{sample.trees[4][0]}/{f}")
-        audio_data.append(data.T[0])
-    audio_data = np.array(audio_data)
-    audio_data = np.mean(audio_data, axis=0)
+# def calculate_spectrum(
+#     sample: Sample,
+#     substring: str,
+#     f_limits=(10, 400)
+# ):
+#     audio_files = os.listdir(sample.trees[4][0])
+#     filtered_files = [f for f in audio_files if substring in f]
+#     audio_data = []
+#     for f in filtered_files:
+#         fs, data = wavfile.read(f"{sample.trees[4][0]}/{f}")
+#         audio_data.append(data.T[0])
+#     audio_data = np.array(audio_data)
+#     audio_data = np.mean(audio_data, axis=0)
     
-    audio_spectrum = np.fft.rfft(audio_data)
-    audio_freqs = np.fft.rfftfreq(len(audio_data), d=1/fs)
-    flow_idx = np.argmin(np.abs(audio_freqs-f_limits[0]))
-    fhigh_idx = np.argmin(np.abs(audio_freqs-f_limits[1]))
-    audio_spectrum = audio_spectrum[flow_idx:fhigh_idx]
-    audio_freqs = audio_freqs[flow_idx:fhigh_idx]
-    return audio_spectrum, audio_freqs
+#     audio_spectrum = np.fft.rfft(audio_data)
+#     audio_freqs = np.fft.rfftfreq(len(audio_data), d=1/fs)
+#     flow_idx = np.argmin(np.abs(audio_freqs-f_limits[0]))
+#     fhigh_idx = np.argmin(np.abs(audio_freqs-f_limits[1]))
+#     audio_spectrum = audio_spectrum[flow_idx:fhigh_idx]
+#     audio_freqs = audio_freqs[flow_idx:fhigh_idx]
+#     return audio_spectrum, audio_freqs
     #  TODO save bc as config file...
     #  bound_dict = {
     #     'temp': [self.temperature],

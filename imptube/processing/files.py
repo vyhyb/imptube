@@ -1,5 +1,8 @@
 """
 This module contains functions for reading and processing audio files.
+
+!!! This module became obsolete after the reimplementation of the tube.py module, 
+!!! it is not usable for the current version of the code. It is kept here for reference.
 """
 import scipy.io.wavfile as wav
 import pandas as pd
