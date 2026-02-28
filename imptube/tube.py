@@ -11,11 +11,7 @@ from scipy.io import wavfile
 from scipy.signal import chirp
 from scipy.signal.windows import hann
 from time import sleep, strftime
-# from imptube.utils import make_foldertree
 from imptube.processing import (
-    # calibration_from_files,
-    # transfer_function_from_path,
-    # alpha_from_path,
     harmonic_distortion_filter,
     calc_rms_pressure_level
 )
@@ -82,11 +78,6 @@ class Measurement:
         self.f_limits = [f_low, f_high]
         self.fs_to_spl = fs_to_spl
         self.sweep_lvl = sweep_lvl
-
-        # self.boundary_df = pd.DataFrame({"fs_to_spl": [fs_to_spl]})
-        # self.boundary_df.to_csv(
-        #     strftime("%y-%m-%d_%H-%M") + "_lvl_calib.csv"
-        # )
 
         self.make_sweep()
         sd.default.samplerate = fs
@@ -209,21 +200,14 @@ class Measurement:
         return filtered_sweep
 
     def measure(self,
-            # out_path : str='',
-            thd_filter : bool=True,
-            # export : bool=True
             ) -> tuple[np.ndarray, int]:
         """Performs measurement and saves the recording. 
         
         Parameters
         ----------
-        out_path : str
-            path where the recording should be saved, including filename
         thd_filter : bool
             enables harmonic distortion filtering
             This affects the files saved.
-        export : bool
-            enables export to specified path
 
         Returns
         -------
@@ -238,30 +222,35 @@ class Measurement:
             output_mapping=self.channels_out,
             dtype=np.float32)
         sd.wait()
-        data = np.asarray(data)
-
-        #filtration
-        if thd_filter:
-            data = data.T
-            data = harmonic_distortion_filter(
-                data, 
-                self.sweep, 
-                f_low=self.f_limits[0], 
-                f_high=self.f_limits[1]
-                )
-            data = data.T
+        self.data = np.asarray(data)
         
-        if export:    
-            sf.write(
-                file=out_path,
-                data=data,
-                samplerate=self.fs,
-                format='WAV',
-                subtype='FLOAT'
-                )
-        
-        return data, self.fs
+        return self.data, self.fs
     
+    def filter_harmonic_distortion(
+        self,
+        ) -> np.ndarray:
+        """Filters the harmonic distortion products from the measured data.
+        A wrapper for the `harmonic_distortion_filter` function 
+        from `imptube.processing.filters` module. 
+        
+        It filters the last measured data, 
+        so it should be called right after `measure` method.
+
+        Returns
+        -------
+        filtered_data : np.ndarray
+            filtered data
+        """
+
+        self.data = harmonic_distortion_filter(
+            p_time=self.data,
+            p_ref=self.sweep,
+            f_low=self.f_limits[0],
+            f_high=self.f_limits[1],
+            fs=self.fs
+            )
+        return self.data, self.fs
+
     def calc_incident_pressure_filter(
         self,
         spectrum: np.ndarray,
@@ -402,7 +391,6 @@ class Sample:
             atm_pressure : float = 101325,
             tube : Tube=Tube(),
             timestamp : str = strftime("%y-%m-%d_%H-%M"),
-            folder = "data",
             ):
         self.name = name
         self.timestamp = timestamp
@@ -410,63 +398,6 @@ class Sample:
         self.atm_pressure = atm_pressure
         self.rel_humidity = rel_humidity
         self.tube = tube
-        self.folder = folder
-        self.trees = make_foldertree(
-            self.name, 
-            self.folder, 
-            self.timestamp
-            )
-        bound_dict = {
-            'temp': [self.temperature],
-            'RH': [self.rel_humidity],
-            'atm_pressure': [self.atm_pressure],
-            'x1': [self.tube.further_mic_dist],
-            'x2': [self.tube.closer_mic_dist],
-            'lim': [self.tube.freq_limit]
-            }
-        self.boundary_df = pd.DataFrame(bound_dict)
-        self.boundary_df.to_csv(
-            os.path.join(
-                self.trees[2],self.trees[1]+"_bound_cond.csv"
-            )
-        )
-            
-    def migrate_cal(self, cal_name, cal_stamp, cal_parent="data"):
-        """Migrates calibration files from different measurement.
-        
-        Parameters
-        ----------
-        cal_name : str
-            calibration sample name
-        cal_stamp : str
-            calibration sample timestamp i a '%y-%m-%d_%H-%M' format
-        cal_parent : str
-            parent data folder, defaults to 'data'
-        """
-        cal_trees = make_foldertree(
-            variant=cal_name,
-            time_stamp=cal_stamp,
-            parent=cal_parent
-            )
-        cal_parent_folder = cal_trees[2]
-        import_folder = cal_trees[3][1]
-        freqs = np.load(
-            os.path.join(cal_parent_folder, cal_trees[1]+"_freqs.npy")
-            ) #freq import
-        cf = np.load(
-            os.path.join(import_folder, cal_trees[1]+"_cal_f_12.npy")
-            ) #cf import
-
-        parent_folder = self.trees[2]
-        export_folder = self.trees[3][1]
-        np.save(
-            os.path.join(parent_folder, self.trees[1]+"_freqs.npy"),
-            freqs
-            ) #freq export
-        np.save(
-            os.path.join(export_folder, self.trees[1]+"_cal_f_12.npy"),
-            cf
-            ) #cf export
 
 def calibration(
         sample : Sample,
@@ -487,9 +418,9 @@ def calibration(
     thd_filter : bool
         Enables harmonic distortion filtering
     """
-    caltree = sample.trees[3][0]
-    if not os.path.exists(caltree):
-        os.makedirs(caltree)
+    # caltree = sample.trees[3][0]
+    # if not os.path.exists(caltree):
+    #     os.makedirs(caltree)
 
     m = measurement
     running = True
@@ -500,9 +431,9 @@ def calibration(
                 break
             else:
                 for s in range(m.sub_measurements):
-                    f = os.path.join(caltree, sample.trees[1]+f"_cal_wav_conf{c}_{s}.wav")
-                    print(f)
-                    m.measure(f, thd_filter=thd_filter)
+                    # f = os.path.join(caltree, sample.trees[1]+f"_cal_wav_conf{c}_{s}.wav")
+                    # print(f)
+                    # m.measure(f, thd_filter=thd_filter)
                     sleep(0.5)
         if input("Repeat calibration process? [y/N]").lower() == "y":
             continue
@@ -510,7 +441,8 @@ def calibration(
             running = False
         input("Move the microphones to original position before measurement!")
     
-    cal = calibration_from_files(parent_folder=sample.trees[2], export=export, noise_filter=noise_filter)
+    # cal = calibration_from_files(parent_folder=sample.trees[2], export=export, noise_filter=noise_filter)
+
 
     return cal
 
