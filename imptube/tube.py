@@ -4,10 +4,6 @@
 import sys
 import sounddevice as sd
 import numpy as np
-import pandas as pd
-import soundfile as sf
-import os
-from scipy.io import wavfile
 from scipy.signal import chirp
 from scipy.signal.windows import hann
 from time import sleep, strftime
@@ -29,38 +25,46 @@ import logging
 
 
 class Measurement:
-    """Contains information about measurement from the perspective of
-    signal and boundary conditions.
+    """Contains information about a measurement, sweep settings and
+    boundary conditions.
 
     Attributes
     ----------
     fs : int
-        measurement sampling frequency
+        measurement sampling frequency.
     channels_in : list[int]
-        list of input channel numbers
+        list of input channel numbers.
     channels_out : list[int]
-        list of output channel numbers (usually one member list)
+        list of output channel numbers (usually a single‑element list).
     device : str
-        string specifying part of sound card name
-        List of available devices can be obtained with
-        `python3 -m sounddevice` command.
+        substring used to select the sound‑card device for playback/record.
+        A full list of devices can be obtained with
+        ``python3 -m sounddevice``.
     samples : int
-        number of samples in the generated log sweep
-        typically 2**n
+        number of samples in the generated log sweep (typically a power of
+        two).
     window_len : int
-        length of the Hann half-window applied to the ends of the sweep
+        length of the Hann half‑window applied to the start and end of the
+        sweep.
     sub_measurements : int
-        number of measurements taken for each specimen
-        Normally, no differences between sweep measurements should occur,
-        this attribute mainly compensates for potential playback artifacts.
-    f_low : int
-        lower frequency limit for the generated sweep
-    f_high : int
-        higher frequency limit for the generated sweep
+        number of recordings taken for each specimen; individual sweeps are
+        averaged to reduce playback/recording artefacts.
+    f_limits : list[int]
+        two‑element list containing the lower and upper frequency limits for
+        sweep generation.
     fs_to_spl : float
-        conversion level from dBFS to dB SPL for microphone 1
+        conversion level from dBFS to dB SPL for microphone 1.
     sweep_lvl : float
-        level of the sweep in dBFS
+        level of the sweep in dBFS.
+    sweep : np.ndarray
+        the most recently generated excitation sweep waveform (set by
+        ``make_sweep``/``regen_sweep``/``filter_sweep``).
+    data : np.ndarray | None
+        last measured audio data; populated by ``measure`` and modified by
+        ``filter_harmonic_distortion``.
+    rms_spl : float | None
+        root‑mean‑square sound‑pressure level calculated during the last
+        measurement (set in ``single_measurement``).
     """
 
     def __init__(
@@ -95,27 +99,31 @@ class Measurement:
 
 
     def make_sweep(self, windows=True) -> np.ndarray:
-        """Generates numpy array with log sweep.
+        """Generate and store a log‑frequency sweep using current settings.
+
+        The sweep is constructed from the attributes of the
+        :class:`Measurement` instance: ``fs``, ``samples``,
+        ``f_limits`` (``f_low``/``f_high``), ``window_len`` and
+        ``sweep_lvl``.  A logarithmic chirp running from the low to the
+        high limit with duration ``samples/fs`` is created.  By default the
+        first and last ``window_len`` samples are tapered with a Hann
+        half‑window; this behaviour can be disabled
+        with the ``windows`` argument.  The generated signal is then
+        scaled to the level specified by ``sweep_lvl`` (dBFS) and stored in
+        ``self.sweep``.
 
         Parameters
         ----------
-        fs : int 
-            measurement sampling frequency
-        samples : int
-            number of samples in the generated log sweep
-            typically 2**n
-        window_len : int
-            length of the Hann half-window applied to the ends
-            of the sweep
-        f_low : int
-            lower frequency limit for the generated sweep
-        f_high : int
-            higher frequency limit for the generated sweep
+        windows : bool, optional
+            Apply Hann half‑windows to the start and end of the sweep.
+            Defaults to ``True``.  If ``False`` the sweep is returned
+            without any windowing.
 
         Returns
         -------
-        log_sweep : np.ndarray
-            numpy array containing mono log sweep
+        np.ndarray
+            The generated mono log sweep.  The same array is assigned to
+            ``self.sweep``.
         """
         t = np.linspace(0,self.samples/self.fs,self.samples, dtype=np.float32)
         
@@ -134,11 +142,11 @@ class Measurement:
         return log_sweep
     
     def regen_sweep(self):
-        """Regenerates the sweep."""
+        """Regenerates the sweep with the current settings."""
         self.make_sweep()
 
     def update_sweep_lvl(self):
-        """Updates the sweep level."""
+        """Updates the sweep level according to ``self.sweep_lvl``."""
         self.sweep = self.sweep/np.max(np.abs(self.sweep))
         self.sweep = self.sweep * 10**(self.sweep_lvl/20)
 
@@ -149,17 +157,25 @@ class Measurement:
         ) -> np.ndarray:
         """Filters the sweep with respect to incident pressure measured beforehand.
 
+        This method applies frequency-domain filtering to the sweep signal by:
+        1. Generating a windowed sweep
+        2. Computing its FFT
+        3. Calculating the amplitude response relative to incident pressure
+        4. Applying blackman window-based filters at frequency limits
+        5. Converting back to time domain with hann windowing
+        6. Normalizing and scaling to the sweep level
+
         Parameters
         ----------
         rfft_incident_pressure : np.ndarray
-            rfft of incident pressure
-        f_lim : tuple[int, int]
-            frequency limits for the filtering
+            rfft of incident pressure spectrum
+        f_limits : tuple[int, int], optional
+            frequency limits for the filtering. Defaults to (10, 400).
         
         Returns
         -------
         filtered_sweep : np.ndarray
-            filtered sweep
+            filtered sweep in time domain, scaled to sweep_lvl
         """
         # generate sweep without windows
         sweep_wo_win = self.make_sweep(windows=False)
@@ -210,18 +226,12 @@ class Measurement:
 
     def measure(self,
             ) -> tuple[np.ndarray, int]:
-        """Performs measurement and saves the recording. 
+        """Performs measurement using playrec with current sweep settings.
         
-        Parameters
-        ----------
-        thd_filter : bool
-            enables harmonic distortion filtering
-            This affects the files saved.
-
         Returns
         -------
         data : np.ndarray
-            measured audio data
+            measured audio data from all input channels
         fs : int
             sampling rate
         """
@@ -240,15 +250,17 @@ class Measurement:
         ) -> np.ndarray:
         """Filters the harmonic distortion products from the measured data.
         A wrapper for the `harmonic_distortion_filter` function 
-        from `imptube.processing.filters` module. 
+        from `imptube.processing` module. 
         
-        It filters the last measured data, 
+        It filters the last measured data stored in `self.data`,
         so it should be called right after `measure` method.
 
         Returns
         -------
         filtered_data : np.ndarray
             filtered data
+        fs : int
+            sampling rate
         """
 
         self.data = harmonic_distortion_filter(
@@ -266,34 +278,34 @@ class Measurement:
         r: np.ndarray,
         f: np.ndarray,
         distance: float,
+        f_limits: tuple[int, int],
         speed_of_sound: float = 343,
-        f_limits=(10, 400)
         ) -> np.ndarray:
-        """
-        Calculates incident pressure filter based on the measured 
+        """Calculates incident pressure filter based on the measured 
         spectrum and reflection factor.
+        
         Such filter can be used to filter the input sweep
         to compensate for the loudspeaker frequency response.
 
         Parameters
         ----------
         spectrum : np.ndarray
-            measured spectrum
+            measured pressure spectrum
         r : np.ndarray
             reflection factor
         f : np.ndarray
             frequency values
         distance : float
             distance between the sample and the microphone
-        speed_of_sound : float
-            speed of sound in air
         f_limits : tuple[int, int]
             frequency limits for the filtering
+        speed_of_sound : float, optional
+            speed of sound in air. Defaults to 343 m/s.
 
         Returns
         -------
         incident_pressure : np.ndarray
-            incident pressure filter
+            incident pressure filter (complex spectrum)
         """
         def calculate_incident_pressure(
             pressure: np.ndarray, 
@@ -301,25 +313,23 @@ class Measurement:
             distance: float,
             wavenumber: np.ndarray
         ):
-            """
-            Calculates incident pressure based on the measured 
-            spectrum and the reflection factor.
+            """Calculate incident pressure from measured spectrum and reflection factor.
 
             Parameters
             ----------
             pressure : np.ndarray
-                measured pressure
+                measured pressure spectrum
             reflection_factor : np.ndarray
                 reflection factor
             distance : float
                 distance between the sample and the microphone
             wavenumber : np.ndarray
-                wavenumber
+                wavenumber values
 
             Returns
             -------
-            incident_pressure : np.ndarray
-                incident pressure filter
+            np.ndarray
+                incident pressure spectrum
             """
             return pressure / (
                 np.exp(-1j * wavenumber * distance) 
@@ -361,7 +371,9 @@ class Tube:
     further_mic_dist : float
         further microphone distance from sample
     closer_mic_dist : float
-        closer mic distance from sample
+        closer microphone distance from sample
+    mic_spacing : float
+        distance between the two microphones
     freq_limit : int
         higher frequency limit for exports
     """
@@ -376,28 +388,41 @@ class Tube:
         self.freq_limit = freq_limit
 
 class Sample:
-    """A class representing sample and its boundary conditions as well as
+    """A class representing a sample and its boundary conditions as well as
     the data from the measurement and calibration.
     
     Attributes
     ----------
     name : str
         name of the sample
-    temperature : float
-        ambient temperature in degC
-    rel_humidity : float
-        ambient relative humidity in %
     tube : Tube
         impedance tube definition object
+    measurement : Measurement
+        measurement settings and sweep configuration
+    temperature : float
+        ambient temperature in °C
+    rel_humidity : float
+        ambient relative humidity in %
+    atm_pressure : float
+        atmospheric pressure in Pa. Defaults to 101325.
     timestamp : str
-        strftime timestamp in a format '%y-%m-%d_%H-%M'
+        strftime timestamp in format '%y-%m-%d_%H-%M'
+    freqs : np.ndarray | None
+        frequency values from measurement
+    cf : np.ndarray | None
+        calibration factor spectrum
+    tf : np.ndarray | None
+        transfer function spectrum
+    tf_corrected : np.ndarray | None
+        calibration-corrected transfer function spectrum
     """
     def __init__(self,
             name : str,
+            tube : Tube,
+            measurement : Measurement,
             temperature : float,
             rel_humidity : float,
             atm_pressure : float = 101325,
-            tube : Tube=Tube(),
             timestamp : str = strftime("%y-%m-%d_%H-%M"),
             ):
         self.name = name
@@ -406,6 +431,7 @@ class Sample:
         self.atm_pressure = atm_pressure
         self.rel_humidity = rel_humidity
         self.tube = tube
+        self.measurement = measurement
         self.freqs = None
         self.cf = None
         self.tf = None
@@ -413,24 +439,25 @@ class Sample:
 
     def calibration(
             self,
-            measurement : Measurement,
             thd_filter : bool=True,
             noise_filter : bool=False,
             ) -> tuple[np.ndarray, np.ndarray]:
-        """Performs CLI calibration measurement.
+        """Performs CLI calibration measurement with two microphone configurations.
         
         Parameters
         ----------
-
-        sample : imptube.tube.Sample
-            
-        measurement : Measurement
-
-        thd_filter : bool
-            Enables harmonic distortion filtering
+        thd_filter : bool, optional
+            Enables harmonic distortion filtering. Defaults to True.
+        noise_filter : bool, optional
+            Enables noise filtering on calibration factor. Defaults to False.
+        
+        Returns
+        -------
+        cf : np.ndarray
+            Calibration factor spectrum stored in self.cf
         """
         cal_data = [[], []]
-        m = measurement
+        m = self.measurement
         running = True
         while running:
             for c in range(1, 3):
@@ -478,33 +505,29 @@ class Sample:
 
     def single_measurement(
             self,
-            measurement : Measurement,
             thd_filter : bool= True,
             noise_filter : bool = False,
             calc_spl : bool = True
             ) -> tuple[list[np.ndarray], int]:
-        """Performs measurement.
+        """Performs measurement with optional filtering and SPL calculation.
         
         Parameters
         ----------
-
-        sample : imptube.tube.Sample
-            
-        measurement : Measurement
-
-        depth : float
-            current depth of the sample
-        thd_filter : bool
-            Enables harmonic distortion filtering
+        thd_filter : bool, optional
+            Enables harmonic distortion filtering. Defaults to True.
+        noise_filter : bool, optional
+            Enables noise filtering on transfer function. Defaults to False.
+        calc_spl : bool, optional
+            Enables SPL calculation and logging. Defaults to True.
 
         Returns
         -------
-        sub_measurement_data : list[np.ndarray]
-            list of audio recordings taken
-        fs : float
-            sampling rate of the recording
+        tf_corrected : np.ndarray
+            Calibration-corrected transfer function spectrum
+        fs : int
+            Sampling rate of the recording
         """
-        m = measurement
+        m = self.measurement
         def _measure():
             sub_measurement_data = []
             for _ in range(m.sub_measurements):
@@ -556,24 +579,30 @@ class Sample:
             return_r : bool = False,
             return_z : bool = False,
             ) -> tuple[np.ndarray, np.ndarray]:
-        """Performs transfer function and alpha calculations from audio data
-        found in a valid folder structure.
+        """Calculates sound absorption coefficient and surface impedance from measured transfer function.
 
         Parameters
         ----------
-        sample : Sample
+        return_r : bool, optional
+            If True, also returns the reflection factor. Defaults to False.
+        return_z : bool, optional
+            If True, also returns the surface impedance. Defaults to False.
 
         Returns
         -------
         alpha : np.ndarray
-            sound absorption coefficient for frequencies lower than 
-            limit specified in sample.tube.freq_limit
+            Sound absorption coefficient
         freqs : np.ndarray
-            frequency values for the alpha array
+            Frequency values corresponding to alpha
+        r : np.ndarray, optional
+            Reflection factor (returned only if return_r=True)
+        z : np.ndarray, optional
+            Surface impedance (returned only if return_z=True)
         """
 
         if self.tf is None:
-            raise ValueError("No transfer function found. Perform measurement first.")
+            raise ValueError("No transfer function found for this sample." \
+                " Perform measurement first.")
 
         tf_incident, tf_reflected = tf_i_r(self.temperature, self.freqs, self.tube.mic_spacing)
         tf_incident = tf_incident
@@ -603,6 +632,32 @@ class Sensor(Protocol):
         ...
     
 def read_env_bc(sensor : Sensor) -> tuple[float, float, float]:
+    """Read environmental data from sensor with retry logic.
+    
+    Attempts to read temperature, humidity, and atmospheric pressure from the 
+    sensor up to 5 times. Exits the program if all attempts fail.
+
+    Parameters
+    ----------
+    sensor : Sensor
+        An instance of a class that implements the Sensor protocol, providing methods to read temperature, humidity, and pressure.
+
+    Returns
+    -------
+    temperature : float
+        The temperature reading from the sensor.
+    rel_humidity : float
+        The relative humidity reading from the sensor.
+    atm_pressure : float
+        The atmospheric pressure reading from the sensor.
+    
+    Raises
+    ------
+    SystemExit
+        If unable to read sensor data after 5 attempts.
+
+
+    """
     for i in range(5):
         try:
             temperature = sensor.read_temperature()
