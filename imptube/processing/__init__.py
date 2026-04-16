@@ -6,9 +6,10 @@ impedance tube measurements. The functions are divided into following submodules
 - signal_proc
 """
 from .files import (
-    calibration_from_files,
-    transfer_function_from_path,
-    alpha_from_path)
+    EnvironmentalConditions,
+    BoundaryConditions,
+    MeasurementResults,
+)
 
 from .filters import (
     harmonic_distortion_filter,

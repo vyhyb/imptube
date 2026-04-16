@@ -144,5 +144,3 @@ from .processing.signal_proc import (
     absorption_coefficient, 
     surface_impedance
 )
-
-from .processing.files import read_file
