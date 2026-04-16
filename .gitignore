@@ -4,3 +4,6 @@ tests.ipynb
 /_old
 /dist
 /routines
+measurement_dev.ipynb
+/bme280
+/bme280/*

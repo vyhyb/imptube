@@ -476,7 +476,7 @@ class Sample:
                 running = False
             input("Move the microphones to original position before measurement!")
         
-        cal_data = [np.mean(cal_data[0], axis=0), np.mean(cal_data[1], axis=0)]
+        cal_data = [np.mean(cal_data[0], axis=0).T, np.mean(cal_data[1], axis=0).T]
 
         if thd_filter:
             cal_data[0] = harmonic_distortion_filter(
@@ -535,9 +535,10 @@ class Sample:
                 sub_measurement_data.append(data)
                 sleep(0.5)
             
-            avg_data = np.mean(sub_measurement_data, axis=0)
+            avg_data = np.mean(sub_measurement_data, axis=0).T
+
             if thd_filter:
-                sub_measurement_data = harmonic_distortion_filter(
+                avg_data = harmonic_distortion_filter(
                     p_time=avg_data,
                     p_ref=m.sweep,
                     f_low=m.f_limits[0],
@@ -545,8 +546,7 @@ class Sample:
                     fs=m.fs
                 )
 
-
-            self.freqs = frequencies(avg_data, m.fs)
+            self.freqs = frequencies(avg_data[0], m.fs)
             p1, p2 = stereo_to_spectra(avg_data)
 
             return p1, p2
@@ -578,6 +578,7 @@ class Sample:
             self,
             return_r : bool = False,
             return_z : bool = False,
+            f_limits : list[int, int] = [None, None]
             ) -> tuple[np.ndarray, np.ndarray]:
         """Calculates sound absorption coefficient and surface impedance from measured transfer function.
 
@@ -603,22 +604,31 @@ class Sample:
         if self.tf is None:
             raise ValueError("No transfer function found for this sample." \
                 " Perform measurement first.")
+        
+        if f_limits[0] is None:
+            f_limits[0] = 1
+        if f_limits[1] is None:
+            f_limits[1] = self.tube.freq_limit
 
-        tf_incident, tf_reflected = tf_i_r(self.temperature, self.freqs, self.tube.mic_spacing)
-        tf_incident = tf_incident
-        tf_reflected = tf_reflected
+        f_low_idx = np.argmin(np.abs(self.freqs-f_limits[0]))
+        f_high_idx = np.argmin(np.abs(self.freqs-f_limits[1]))
 
-        rf = reflection_factor(tf_incident, tf_reflected, self.tf_corrected, self.temperature, self.freqs, self.tube.further_mic_dist)
+        _freqs = self.freqs[f_low_idx:f_high_idx]
+        _tf_corrected = self.tf_corrected[f_low_idx:f_high_idx]
+
+        tf_incident, tf_reflected = tf_i_r(self.temperature, _freqs, self.tube.mic_spacing)
+
+        rf = reflection_factor(tf_incident, tf_reflected, _tf_corrected, self.temperature, _freqs, self.tube.further_mic_dist)
         an = absorption_coefficient(rf)
         zs = surface_impedance(rf, self.temperature, self.atm_pressure)
 
-        ret = [an, self.freqs]
+        ret = [an, _freqs]
         if return_r:
             ret.append(rf)
         if return_z:
             ret.append(zs)
 
-        return 
+        return tuple(ret)
 
 class Sensor(Protocol):
     """A protocol for Sensor class implementation."""
